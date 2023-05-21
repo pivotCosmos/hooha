@@ -174,15 +174,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: const TextStyle(fontSize: 18.0),
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (int i = 0; i < _responseOptions.length; i++)
-                      ElevatedButton(
-                        onPressed: () => _selectResponse(_responseOptions[i]),
-                        child: Text(_responseOptions[i]),
-                      ),
-                  ],
+                Builder(
+                  builder: (context) {
+                    final isChatbotMessage = _messages.length % 2 == 0;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        for (int i = 0; i < _responseOptions.length; i++)
+                          ElevatedButton(
+                            //deactivate buttons while waiting for the AI response.
+                            onPressed: isChatbotMessage
+                                ? null
+                                : () => _selectResponse(_responseOptions[i]),
+                            child: Text(_responseOptions[i]),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
