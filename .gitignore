@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+<<<<<<< HEAD
 =======
 # Miscellaneous
 *.class
@@ -89,3 +90,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 >>>>>>> 4c39a0e5b83d92c351e69461158a3eaa8aa426bf
+=======
+
+# API related
+.env
+>>>>>>> 965c6075064cd357b4b0dd3847b84110cf66d2a6
