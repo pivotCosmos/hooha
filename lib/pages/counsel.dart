@@ -41,8 +41,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final _selectButtonMessage = 'Select a button';
   final _defaultOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
 
+  final ScrollController _scrollController = ScrollController();
+
   /// bubble settings : styleSomebody - chatbot , styleMe - user
-  static const styleSomebody = BubbleStyle(
+  static const styleChatbot = BubbleStyle(
     nip: BubbleNip.leftCenter,
     color: Colors.white,
     borderColor: Colors.blue,
@@ -78,9 +80,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
+      _scrollController.jumpTo(
+          _scrollController.position.maxScrollExtent); // Scroll to the bottom
     });
   }
 
+  /// OpenAI API에서 답변 가져오기
   Future<String> _getAIResponse(String message) async {
     final response = await http.post(
       Uri.parse('https://api.openai.com/v1/engines/$MODEL_ID/completions'),
@@ -120,12 +125,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  ///사용자에게 제공할 버튼 텍스트 입력
+  /// 사용자에게 제공할 선택지 버튼에 텍스트 세팅
   void setButtonOptions(List<String>? options) {
-    if (options == null || options.isEmpty) {
-      options = ['선택지1', '선택지2', '선택지3', '선택지4'];
-    }
-
     setState(() {
       _responseOptions = options!;
     });
@@ -142,61 +143,107 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isChatbotMessage = index % 2 == 0;
-
-                return Bubble(
-                  style: isChatbotMessage ? styleSomebody : styleMe,
-                  child: Text(
-                    message,
-                    style: const TextStyle(fontSize: 18.0),
-                  ),
-                );
-              },
-            ),
+            child: MessageBubbleListView(
+                scrollController: _scrollController,
+                messages: _messages,
+                styleChatbot: styleChatbot,
+                styleMe: styleMe),
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    _selectButtonMessage,
-                    style: const TextStyle(fontSize: 18.0),
-                  ),
-                ),
+                SelectButtonMessageContainer(
+                    selectButtonMessage: _selectButtonMessage),
                 Builder(
-                  builder: (context) {
-                    final isChatbotMessage = _messages.length % 2 == 0;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        for (int i = 0; i < _responseOptions.length; i++)
-                          ElevatedButton(
-                            //deactivate buttons while waiting for the AI response.
-                            onPressed: isChatbotMessage
-                                ? null
-                                : () => _selectResponse(_responseOptions[i]),
-                            child: Text(_responseOptions[i]),
-                          ),
-                      ],
-                    );
-                  },
+                  builder: createResponseOptionButtons,
                 ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// 사용자에게 제공할 선택지 버튼 생성
+  Widget createResponseOptionButtons(context) {
+    final isChatbotMessage = _messages.length % 2 == 0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        for (int i = 0; i < _responseOptions.length; i++)
+          ElevatedButton(
+            //deactivate buttons while waiting for the AI response.
+            onPressed: isChatbotMessage
+                ? null
+                : () => _selectResponse(_responseOptions[i]),
+            child: Text(_responseOptions[i]),
+          ),
+      ],
+    );
+  }
+}
+
+/// 버튼 상단에 띄워줄 안내 메시지
+class SelectButtonMessageContainer extends StatelessWidget {
+  const SelectButtonMessageContainer({
+    super.key,
+    required String selectButtonMessage,
+  }) : _selectButtonMessage = selectButtonMessage;
+
+  final String _selectButtonMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      padding: const EdgeInsets.all(12.0),
+      child: Text(
+        _selectButtonMessage,
+        style: const TextStyle(fontSize: 18.0),
+      ),
+    );
+  }
+}
+
+/// 대화 내용을 담아 채팅창에 띄워줄 버블 리스트뷰
+class MessageBubbleListView extends StatelessWidget {
+  const MessageBubbleListView({
+    super.key,
+    required ScrollController scrollController,
+    required List<String> messages,
+    required this.styleChatbot,
+    required this.styleMe,
+  })  : _scrollController = scrollController,
+        _messages = messages;
+
+  final ScrollController _scrollController;
+  final List<String> _messages;
+  final BubbleStyle styleChatbot;
+  final BubbleStyle styleMe;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _scrollController, // Assign the ScrollController
+      itemCount: _messages.length,
+      itemBuilder: (context, index) {
+        final message = _messages[index];
+        final isChatbotMessage = index % 2 == 0;
+
+        return Bubble(
+          style: isChatbotMessage ? styleChatbot : styleMe,
+          child: Text(
+            message,
+            style: const TextStyle(fontSize: 18.0),
+          ),
+        );
+      },
     );
   }
 }
