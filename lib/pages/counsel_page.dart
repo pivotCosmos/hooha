@@ -15,26 +15,27 @@ class GetCounsel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'HOOHA',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(title: 'OpenAI Chatbot'),
+      home: const CounselPage(title: 'OpenAI Chatbot'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class CounselPage extends StatefulWidget {
+  const CounselPage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _CounselPageState createState() => _CounselPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _CounselPageState extends State<CounselPage> {
   final _messages = <String>[];
   List<String> _responseOptions = [];
   final _defaultMessage = 'Welcome';
@@ -72,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
     alignment: Alignment.topRight,
   );
 
-  _MyHomePageState() {
+  _CounselPageState() {
     _messages.add(_defaultMessage); // Add the default welcome message
     _responseOptions = List.from(_defaultOptions); // Set default button options
   }
@@ -136,9 +137,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
