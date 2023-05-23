@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import './Home_page.dart';
-import './Calendar_Page.dart';
-import './counsel.dart';
-import './MyPage.dart';
-import './Notification_page.dart';
+import './home_page.dart';
+import './calendar_page.dart';
+import './counsel_page.dart';
+import './my_page.dart';
+import './notification_page.dart';
 
 class NavigationExample extends StatefulWidget {
   const NavigationExample({Key? key}) : super(key: key);
