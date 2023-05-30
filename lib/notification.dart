@@ -1,146 +1,188 @@
-/*
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone_updated_gradle/flutter_native_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 
 class FlutterLocalNotification {
-  // 생성자
   FlutterLocalNotification._();
 
-  static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  static FlutterLocalNotificationsPlugin noticePlugIn =
       FlutterLocalNotificationsPlugin();
 
+  //알림 초기화
   static init() async {
-    // 초기화 함수
-    AndroidInitializationSettings androidInitializationSettings =
-        const AndroidInitializationSettings(
-            'mipmap/ic_launcher'); // 안드로이드 초기 세팅
+    tz.initializeTimeZones();
+    final timezoneName = await FlutterNativeTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timezoneName));
 
-    DarwinInitializationSettings iosInitializationSettings =
+    AndroidInitializationSettings androidInitSettings =
+        const AndroidInitializationSettings('mipmap/ic_launcher');
+
+    DarwinInitializationSettings initializationSettingsDarwin =
         const DarwinInitializationSettings(
-      // 안드로이드 허용 알림
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false);
 
-    InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iosInitializationSettings,
-    ); // 안드로이드와 ios를 통합
+    InitializationSettings initSettings = InitializationSettings(
+        android: androidInitSettings, iOS: initializationSettingsDarwin);
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  } //초기화한 세팅 넣어주기
-  // 여기까지가 초기 세팅
+    await noticePlugIn.initialize(initSettings);
+  }
 
+  //알림 발송 권한 부여(iOS)
   static requestNotificationPermission() {
-    flutterLocalNotificationsPlugin
+    noticePlugIn
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+        ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   static Future<void> showNotification() async {
-    // 푸시 알림을 보여줌
-    const AndroidNotificationDetails androidNotificationDetails =
+    const AndroidNotificationDetails androidNoticeDetails =
         AndroidNotificationDetails('channel id', 'channel name',
             channelDescription: 'channel description',
             importance: Importance.max,
             priority: Priority.max,
             showWhen: false);
 
-    const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails,
+    const NotificationDetails noticeDetails = NotificationDetails(
+        android: androidNoticeDetails,
         iOS: DarwinNotificationDetails(badgeNumber: 1));
 
-    await flutterLocalNotificationsPlugin.show(
-        0, 'test title', 'test body', notificationDetails);
+    await noticePlugIn.show(
+        0, 'HOOHA 알림', '금연 성공하면 1000만원 받는다!', noticeDetails);
+  }
+
+  static showNotification2() async {
+    //var now = tz.TZDateTime.now(tz.local);
+
+    var androidDetails = const AndroidNotificationDetails(
+      'channel id',
+      'channel name',
+      priority: Priority.high,
+      importance: Importance.max,
+      color: Color.fromARGB(255, 255, 166, 0),
+    );
+
+    noticePlugIn.zonedSchedule(
+        1,
+        'HOOHA 알림',
+        '다시 담배를 피우면 나는 죽는다.',
+        makeDate(10, 45, 0),
+        // tz.TZDateTime(tz.local, now.year, now.month, now.day, now.hour,
+        //     now.minute + 1, now.second),
+        NotificationDetails(android: androidDetails),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time);
+  }
+
+  static makeDate(hour, minute, second) {
+    var now = tz.TZDateTime.now(tz.local);
+    var when = tz.TZDateTime(
+        tz.local, now.year, now.month, now.day, hour, minute, second);
+    if (when.isBefore(now)) {
+      return when.add(const Duration(days: 1));
+    } else {
+      return when;
+    }
+  }
+}
+
+
+
+/*import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone_updated_gradle/flutter_native_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
+
+class FlutterLocalNotification {
+  FlutterLocalNotification._();
+
+  static FlutterLocalNotificationsPlugin noticePlugIn =
+      FlutterLocalNotificationsPlugin();
+
+  //알림 초기화
+  static init() async {
+    tz.initializeTimeZones();
+    final timezoneName = await FlutterNativeTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timezoneName));
+
+    AndroidInitializationSettings androidInitSettings =
+        const AndroidInitializationSettings('mipmap/ic_launcher');
+
+    DarwinInitializationSettings initializationSettingsDarwin =
+        const DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false);
+
+    InitializationSettings initSettings = InitializationSettings(
+        android: androidInitSettings, iOS: initializationSettingsDarwin);
+
+    await noticePlugIn.initialize(initSettings);
+  }
+
+  //알림 발송 권한 부여(iOS)
+  static requestNotificationPermission() {
+    noticePlugIn
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+  }
+
+  static Future<void> showNotification() async {
+    const AndroidNotificationDetails androidNoticeDetails =
+        AndroidNotificationDetails('channel id', 'channel name',
+            channelDescription: 'channel description',
+            importance: Importance.max,
+            priority: Priority.max,
+            showWhen: false);
+
+    const NotificationDetails noticeDetails = NotificationDetails(
+        android: androidNoticeDetails,
+        iOS: DarwinNotificationDetails(badgeNumber: 1));
+
+    await noticePlugIn.show(
+        0, 'HOOHA 알림', '금연 성공하면 1000만원 받는다!', noticeDetails);
+  }
+
+  static showNotification2() async {
+    //var now = tz.TZDateTime.now(tz.local);
+
+    var androidDetails = const AndroidNotificationDetails(
+      'channel id',
+      'channel name',
+      priority: Priority.high,
+      importance: Importance.max,
+      color: Color.fromARGB(255, 255, 166, 0),
+    );
+
+    noticePlugIn.zonedSchedule(
+        1,
+        'HOOHA 알림',
+        '다시 담배를 피우면 나는 죽는다.',
+        makeDate(9, 54, 0),
+        // tz.TZDateTime(tz.local, now.year, now.month, now.day, now.hour,
+        //     now.minute + 1, now.second),
+        NotificationDetails(android: androidDetails),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time);
+  }
+
+  static makeDate(hour, minute, second) {
+    var now = tz.TZDateTime.now(tz.local);
+    var when = tz.TZDateTime(
+        tz.local, now.year, now.month, now.day, hour, minute, second);
+    if (when.isBefore(now)) {
+      return when.add(const Duration(days: 1));
+    } else {
+      return when;
+    }
   }
 }
 */
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-class FlutterLocalNotification {
-  FlutterLocalNotification._();
-
-  static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  static init() async {
-    AndroidInitializationSettings androidInitializationSettings =
-        const AndroidInitializationSettings('mipmap/ic_launcher');
-
-    DarwinInitializationSettings iosInitializationSettings =
-        const DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-
-    InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iosInitializationSettings,
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  static requestNotificationPermission() {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-  }
-
-  static Future<void> showNotification() async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('channel id', 'channel name',
-            channelDescription: 'channel description',
-            importance: Importance.max,
-            priority: Priority.max,
-            showWhen: false);
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails,
-        iOS: DarwinNotificationDetails(badgeNumber: 1));
-
-    await flutterLocalNotificationsPlugin.show(
-        0, 'test title', 'test body', notificationDetails);
-  }
-}
-
-class NotificationSwitch extends StatefulWidget {
-  const NotificationSwitch({Key? key}) : super(key: key);
-
-  @override
-  _NotificationSwitchState createState() => _NotificationSwitchState();
-}
-
-class _NotificationSwitchState extends State<NotificationSwitch> {
-  bool _isSwitched = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Switch(
-      value: _isSwitched,
-      onChanged: (value) {
-        setState(() {
-          _isSwitched = value;
-          if (_isSwitched) {
-            FlutterLocalNotification.showNotification();
-          } else {
-            FlutterLocalNotificationsPlugin()
-                .cancelAll(); // 알림이 꺼진 상태에서는 알림을 취소합니다.
-          }
-        });
-      },
-    );
-  }
-}
