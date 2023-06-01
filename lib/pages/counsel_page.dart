@@ -90,6 +90,7 @@ class _CounselPageState extends State<CounselPage> {
     _options = List.from(_defaultOptions); // Set default button options
   }
 
+  // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
@@ -98,10 +99,12 @@ class _CounselPageState extends State<CounselPage> {
     });
   }
 
+  // 챗봇 응답 띄우기
+
   // Firestore 인스턴스 가져오기
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  /// DB에서 챗봇 메시지 가져오기
+  /// Firestore에서 챗봇 메시지 가져오기
   Future<String> _getChatbotMsg(int msgNo) async {
     String collectionName = 'chatbot_msg'; // 컬렉션 이름
     String documentId = msgNo.toString(); // 문서 ID
@@ -129,6 +132,7 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// OpenAI API에서 답변 가져오기
+  /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
     final response = await http.post(
       Uri.parse('https://api.openai.com/v1/engines/$MODEL_ID/completions'),
@@ -153,23 +157,26 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 챗봇 메시지와 선택지 버튼 띄우기
-  /// option:
-  void _showMsgAndOptions(String option) {
-    _addMessage(option);
-
+  /// option: 선택지 버튼 텍스트
+  void _showHoohaMsgAndUserOptions(String option) async {
     // 시나리오 혹은 프롬프트로 분기 나누기
 
-    // Call the API for the next chatbot response
+    // 1. 시나리오인 경우 DB에서 가져와서 _messages에 저장
+    String msg = await _getChatbotMsg(0);
+    _addMessage(msg);
+
+    // 2. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
     _getAIResponse(option).then((aiResponse) {
       _addMessage(aiResponse);
-
-      // 선택지 버튼 텍스트 업데이트
-      setState(() {
-        _options = List.from(_defaultOptions);
-      });
     }).catchError((error) {
       _addMessage('Error: ${error.toString()}');
     });
+
+    // 선택지 버튼 텍스트 업데이트
+    setButtonOptions(_defaultOptions);
+    // setState(() {
+    //   _options = List.from(_defaultOptions);
+    // });
   }
 
   /// 사용자에게 제공할 선택지&다음 메시지 번호 세팅
@@ -221,9 +228,10 @@ class _CounselPageState extends State<CounselPage> {
       children: [
         for (int i = 0; i < _options.length; i++)
           ElevatedButton(
-            //deactivate buttons while waiting for the AI response.
-            onPressed:
-                isChatbotMessage ? null : () => _showMsgAndOptions(_options[i]),
+            // 챗봇 응답 기다리는 동안 선택지 버튼 비활성화
+            onPressed: isChatbotMessage
+                ? null
+                : () => _showHoohaMsgAndUserOptions(_options[i]),
             child: Text(_options[i]),
           ),
       ],
