@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/counsel_page.dart';
-import '/pages/Home_page.dart';
-import '/pages/Calendar_Page.dart';
-import '/pages/counsel_page.dart';
-import 'package:flutter_application_1/pages/MyPage.dart';
-import '/pages/Notification_page.dart';
+import './home_page.dart';
+import './calendar_page.dart';
+import './counsel_page.dart';
+import './my_page.dart';
+import './notification_page.dart';
 
 class NavigationExample extends StatefulWidget {
   const NavigationExample({Key? key}) : super(key: key);
@@ -77,7 +76,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         const HomePage(),
         const CalendarPage(),
         const GetCounsel(),
-        MyPage(),
+        const MyPage(),
       ][currentPageIndex],
     );
   }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "599759573983",
+    "project_id": "hooha-app",
+    "storage_bucket": "hooha-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599759573983:android:ae4ea028ed0a48f0502a6a",
+        "android_client_info": {
+          "package_name": "com.example.hooha"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6oG46VDQUKD5ECKBKTXf8wDqJU511nJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

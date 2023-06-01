@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,15 +37,24 @@ class CounselPage extends StatefulWidget {
 }
 
 class _CounselPageState extends State<CounselPage> {
+  /// 챗봇이 사용자에게 보내는 메시지
   final _messages = <String>[];
-  List<String> _responseOptions = [];
+
+  /// 사용자에게 주어지는 선택지
+  List<String> _options = [];
+
+  /// 선택지 버튼을 클릭하면 이어지는 다음 챗봇 메시지 번호
+  List<int> _nextMessagesNums = [];
+
+  // 디폴트 세팅들
   final _defaultMessage = 'Welcome';
   final _selectButtonMessage = 'Select a button';
-  final _defaultOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+  final _defaultOptions = ['금연 정보 얻기', '상담 받기', 'Option 3', 'Option 4'];
 
+  /// 자동으로 스크롤이 내려가게 하기 위한 스크롤컨트롤러
   final ScrollController _scrollController = ScrollController();
 
-  /// bubble settings : styleSomebody - chatbot , styleMe - user
+  /// 챗봇 말풍선 스타일
   static const styleChatbot = BubbleStyle(
     nip: BubbleNip.leftCenter,
     color: Colors.white,
@@ -59,6 +69,7 @@ class _CounselPageState extends State<CounselPage> {
     alignment: Alignment.topLeft,
   );
 
+  /// 사용자 말풍선 스타일
   static const styleMe = BubbleStyle(
     nip: BubbleNip.rightCenter,
     color: Color.fromARGB(255, 209, 230, 255),
@@ -73,9 +84,10 @@ class _CounselPageState extends State<CounselPage> {
     alignment: Alignment.topRight,
   );
 
+  // 디폴트 메시지, 버튼 세팅
   _CounselPageState() {
     _messages.add(_defaultMessage); // Add the default welcome message
-    _responseOptions = List.from(_defaultOptions); // Set default button options
+    _options = List.from(_defaultOptions); // Set default button options
   }
 
   void _addMessage(String message) {
@@ -84,6 +96,36 @@ class _CounselPageState extends State<CounselPage> {
       _scrollController.jumpTo(
           _scrollController.position.maxScrollExtent); // Scroll to the bottom
     });
+  }
+
+  // Firestore 인스턴스 가져오기
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  /// DB에서 챗봇 메시지 가져오기
+  Future<String> _getChatbotMsg(int msgNo) async {
+    String collectionName = 'chatbot_msg'; // 컬렉션 이름
+    String documentId = msgNo.toString(); // 문서 ID
+
+    try {
+      // Firestore에서 문서 가져오기
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(documentId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        // 문서가 존재할 경우 필드 값 가져오기
+        String msgTxt = documentSnapshot.get('msg_txt');
+        String options = documentSnapshot.get('options');
+
+        return '$msgTxt, $options'; // 가져온 값 반환
+      } else {
+        return '문서가 존재하지 않습니다.';
+      }
+    } catch (e) {
+      print('Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      return '오류가 발생했습니다.';
+    }
   }
 
   /// OpenAI API에서 답변 가져오기
@@ -110,30 +152,37 @@ class _CounselPageState extends State<CounselPage> {
     }
   }
 
-  void _selectResponse(String response) {
-    _addMessage(response);
+  /// 챗봇 메시지와 선택지 버튼 띄우기
+  /// option:
+  void _showMsgAndOptions(String option) {
+    _addMessage(option);
+
+    // 시나리오 혹은 프롬프트로 분기 나누기
 
     // Call the API for the next chatbot response
-    _getAIResponse(response).then((aiResponse) {
+    _getAIResponse(option).then((aiResponse) {
       _addMessage(aiResponse);
 
-      // Reset button options to default after selecting a response
+      // 선택지 버튼 텍스트 업데이트
       setState(() {
-        _responseOptions = List.from(_defaultOptions);
+        _options = List.from(_defaultOptions);
       });
     }).catchError((error) {
       _addMessage('Error: ${error.toString()}');
     });
   }
 
-  /// 사용자에게 제공할 선택지 버튼에 텍스트 세팅
+  /// 사용자에게 제공할 선택지&다음 메시지 번호 세팅
   void setButtonOptions(List<String>? options) {
     setState(() {
-      _responseOptions = options!;
+      /// 선택지 텍스트 세팅
+      _options = options!;
+
+      /// 선택지에 연결된 다음 메시지 번호 세팅
+      _nextMessagesNums = [0, 1, 2, 3];
     });
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,7 +203,7 @@ class _CounselPageState extends State<CounselPage> {
                 SelectButtonMessageContainer(
                     selectButtonMessage: _selectButtonMessage),
                 Builder(
-                  builder: createResponseOptionButtons,
+                  builder: createOptionButtons,
                 ),
               ],
             ),
@@ -165,18 +214,17 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 사용자에게 제공할 선택지 버튼 생성
-  Widget createResponseOptionButtons(context) {
+  Widget createOptionButtons(context) {
     final isChatbotMessage = _messages.length % 2 == 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        for (int i = 0; i < _responseOptions.length; i++)
+        for (int i = 0; i < _options.length; i++)
           ElevatedButton(
             //deactivate buttons while waiting for the AI response.
-            onPressed: isChatbotMessage
-                ? null
-                : () => _selectResponse(_responseOptions[i]),
-            child: Text(_responseOptions[i]),
+            onPressed:
+                isChatbotMessage ? null : () => _showMsgAndOptions(_options[i]),
+            child: Text(_options[i]),
           ),
       ],
     );
