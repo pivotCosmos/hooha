@@ -16,6 +16,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   DateTime dateTime = DateTime.now();
   DateTime dateTime2 = DateTime.now();
   bool isNotificationEnabled = false; // 알림 활성화 여부
+  bool isNotificationEnabled2 = false; // 알림 활성화 여부
   int notificationId = 0; // 푸시 알림 ID
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -40,7 +41,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
   void toggleNotification2(bool value) {
     setState(() {
-      isNotificationEnabled = value;
+      isNotificationEnabled2 = value;
       if (isNotificationEnabled) {
         scheduleNotification();
       } else {
@@ -260,7 +261,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   child: Transform.scale(
                     scale: 0.8,
                     child: CupertinoSwitch(
-                      value: isNotificationEnabled,
+                      value: isNotificationEnabled2,
                       onChanged: toggleNotification2,
                     ),
                   ),
