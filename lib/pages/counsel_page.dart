@@ -224,8 +224,7 @@ class _CounselPageState extends State<CounselPage> {
     //   _addMessage('Error: ${error.toString()}');
     // });
 
-    // 선택지 버튼 텍스트 업데이트
-    // 옵션 값 가져오기
+    // 옵션 값 가져와서 _options에 저장하기
     String? options = msgData['options'];
     List<String>? optionList = options?.split(' ');
     List<String> optTxtList = [];
@@ -235,7 +234,7 @@ class _CounselPageState extends State<CounselPage> {
       optTxtList.add(txt!);
     }
 
-    // _options에 저장하기
+    // 선택지 버튼 텍스트 업데이트
     setButtonOptions(optTxtList);
   }
 
