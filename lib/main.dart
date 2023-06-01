@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'notification.dart';
 import 'package:flutter_application_1/pages/navigation.dart';
 
 const apiKey = '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';
@@ -36,13 +35,6 @@ class _FirstPageState extends State<FirstPage> {
   //     tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
 
   @override
-  void initState() {
-    FlutterLocalNotification.init();
-    Future.delayed(const Duration(seconds: 3),
-        FlutterLocalNotification.requestNotificationPermission());
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,9 +53,6 @@ class _FirstPageState extends State<FirstPage> {
                     builder: (context) => ResultPage(prompt)));
               },
               child: const Text("Get Result")),
-          TextButton(
-              onPressed: () => FlutterLocalNotification.showNotification2(),
-              child: const Text("알림 보내기"))
         ],
       ),
     );

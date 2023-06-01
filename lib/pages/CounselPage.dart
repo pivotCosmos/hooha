@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../notification.dart';
 
 const apiKey = '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';
 const apiUrl = 'https://api.openai.com/v1/completions';
@@ -28,13 +27,6 @@ class _FirstPageState extends State<FirstPage> {
   final TextEditingController _controller = TextEditingController();
 
   @override
-  void initState() {
-    FlutterLocalNotification.init();
-    Future.delayed(const Duration(seconds: 3),
-        FlutterLocalNotification.requestNotificationPermission());
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,9 +42,6 @@ class _FirstPageState extends State<FirstPage> {
                     builder: (context) => ResultPage(prompt)));
               },
               child: const Text("Get Result")),
-          TextButton(
-              onPressed: () => FlutterLocalNotification.showNotification2(),
-              child: const Text("알림 보내기"))
         ],
       ),
     );
