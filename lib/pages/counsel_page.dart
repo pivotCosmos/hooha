@@ -157,8 +157,11 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 챗봇 메시지와 선택지 버튼 띄우기
-  /// option: 선택지 버튼 텍스트
+  /// option: 사용자가 클릭한 선택지 버튼 텍스트
   void _showHoohaMsgAndUserOptions(String option) async {
+    // 사용자가 클릭한 선택지 텍스트를 버블로 띄워주기
+    _addMessage(option);
+
     // 시나리오 혹은 프롬프트로 분기 나누기
 
     // 1. 시나리오인 경우 DB에서 가져와서 _messages에 저장
