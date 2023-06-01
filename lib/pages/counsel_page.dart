@@ -49,7 +49,7 @@ class _CounselPageState extends State<CounselPage> {
   // 디폴트 세팅들
   final _defaultMessage = 'Welcome';
   final _selectButtonMessage = 'Select a button';
-  final _defaultOptions = ['금연 정보 얻기', '상담 받기', 'Option 3', 'Option 4'];
+  final _defaultOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
 
   /// 자동으로 스크롤이 내려가게 하기 위한 스크롤컨트롤러
   final ScrollController _scrollController = ScrollController();
@@ -105,9 +105,10 @@ class _CounselPageState extends State<CounselPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   /// Firestore에서 챗봇 메시지 가져오기
-  Future<String> _getChatbotMsg(int msgNo) async {
+  /// return msgTxt, options
+  Future<Map<String, String>> _getChatbotMsg(String msgNo) async {
     String collectionName = 'chatbot_msg'; // 컬렉션 이름
-    String documentId = msgNo.toString(); // 문서 ID
+    String documentId = msgNo; // 문서 ID
 
     try {
       // Firestore에서 문서 가져오기
@@ -121,13 +122,59 @@ class _CounselPageState extends State<CounselPage> {
         String msgTxt = documentSnapshot.get('msg_txt');
         String options = documentSnapshot.get('options');
 
-        return '$msgTxt, $options'; // 가져온 값 반환
+        return {
+          'msgTxt': msgTxt,
+          'options': options,
+        }; // 가져온 값 반환
       } else {
-        return '문서가 존재하지 않습니다.';
+        return {
+          'msgTxt': '문서가 존재하지 않습니다.',
+          'options': '',
+        };
       }
     } catch (e) {
       print('Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
-      return '오류가 발생했습니다.';
+      return {
+        'msgTxt': '오류가 발생했습니다.',
+        'options': '',
+      };
+    }
+  }
+
+  /// Firestore에서 선택지 텍스트 가져오기
+  /// return nextMsg, optionTxt
+  Future<Map<String, String>> _getOptionMsg(String msgNo) async {
+    String collectionName = 'options'; // 컬렉션 이름
+    String documentId = msgNo; // 문서 ID
+
+    try {
+      // Firestore에서 문서 가져오기
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(documentId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        // 문서가 존재할 경우 필드 값 가져오기
+        String nextMsg = documentSnapshot.get('next_msg');
+        String optionTxt = documentSnapshot.get('option_txt');
+
+        return {
+          'nextMsg': nextMsg,
+          'optionTxt': optionTxt,
+        }; // 가져온 값 반환
+      } else {
+        return {
+          'nextMsg': '문서가 존재하지 않습니다.',
+          'options': '',
+        };
+      }
+    } catch (e) {
+      print('Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      return {
+        'nextMsg': '오류가 발생했습니다.',
+        'optionTxt': '',
+      };
     }
   }
 
@@ -163,23 +210,33 @@ class _CounselPageState extends State<CounselPage> {
     _addMessage(option);
 
     // 시나리오 혹은 프롬프트로 분기 나누기
+    // 분기 나눈 뒤에 API 호출 부분 주석 해제
 
     // 1. 시나리오인 경우 DB에서 가져와서 _messages에 저장
-    String msg = await _getChatbotMsg(0);
-    _addMessage(msg);
+    Map<String, String> msgData = await _getChatbotMsg('0');
+    String? msgTxt = msgData['msgTxt'];
+    _addMessage(msgTxt!);
 
     // 2. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-    _getAIResponse(option).then((aiResponse) {
-      _addMessage(aiResponse);
-    }).catchError((error) {
-      _addMessage('Error: ${error.toString()}');
-    });
+    // _getAIResponse(option).then((aiResponse) {
+    //   _addMessage(aiResponse);
+    // }).catchError((error) {
+    //   _addMessage('Error: ${error.toString()}');
+    // });
 
     // 선택지 버튼 텍스트 업데이트
-    setButtonOptions(_defaultOptions);
-    // setState(() {
-    //   _options = List.from(_defaultOptions);
-    // });
+    // 옵션 값 가져오기
+    String? options = msgData['options'];
+    List<String>? optionList = options?.split(' ');
+    List<String> optTxtList = [];
+    for (var opt in optionList!) {
+      Map<String, String> optMap = await _getOptionMsg(opt);
+      String? txt = optMap['optionTxt'];
+      optTxtList.add(txt!);
+    }
+
+    // _options에 저장하기
+    setButtonOptions(optTxtList);
   }
 
   /// 사용자에게 제공할 선택지&다음 메시지 번호 세팅
