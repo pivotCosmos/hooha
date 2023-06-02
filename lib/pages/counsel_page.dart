@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -97,8 +98,10 @@ class _CounselPageState extends State<CounselPage> {
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
-      _scrollController.jumpTo(
-          _scrollController.position.maxScrollExtent); // Scroll to the bottom
+      Timer(const Duration(milliseconds: 500), () {
+        _scrollController.jumpTo(
+            _scrollController.position.maxScrollExtent); // Scroll to the bottom
+      });
     });
   }
 
