@@ -10,7 +10,24 @@ class NotificationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('알림'), //알림 페이지의 상단바에 표시될 타이틀
+        backgroundColor: Colors.white,
+        title:const Center(
+          child:Text(
+          '알림',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+          ),
+        ), //알림 페이지의 상단바에 표시될 타이틀
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ), 
+          onPressed: () { 
+            Navigator.pop(context);
+           },
+        ),
       ),
       body: ListView.builder(
         itemCount: notifications
