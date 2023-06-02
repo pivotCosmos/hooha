@@ -47,12 +47,8 @@ class _CounselPageState extends State<CounselPage> {
   /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들
   List<String> _nextMessagesNums = ['0'];
 
-  /// 다음에 띄워줄 챗봇 메시지 번호 (디폴트 '0')
-  //String _nextChatbotMsgNo = '0';
-
   // 디폴트 세팅들
   final _defaultMessage = '안녕하세요! 후하와 대화를 시작해 볼까요?';
-  final _selectButtonMessage = 'Select a button';
   final _defaultOptions = ['좋아요!'];
 
   /// 자동으로 스크롤이 내려가게 하기 위한 스크롤컨트롤러
@@ -299,14 +295,8 @@ class _CounselPageState extends State<CounselPage> {
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                SelectButtonMessageContainer(
-                    selectButtonMessage: _selectButtonMessage),
-                Builder(
-                  builder: createOptionButtons,
-                ),
-              ],
+            child: Builder(
+              builder: createOptionButtons,
             ),
           ),
         ],
@@ -329,32 +319,6 @@ class _CounselPageState extends State<CounselPage> {
             child: Text(_options[i]),
           ),
       ],
-    );
-  }
-}
-
-/// 버튼 상단에 띄워줄 안내 메시지
-class SelectButtonMessageContainer extends StatelessWidget {
-  const SelectButtonMessageContainer({
-    super.key,
-    required String selectButtonMessage,
-  }) : _selectButtonMessage = selectButtonMessage;
-
-  final String _selectButtonMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      padding: const EdgeInsets.all(12.0),
-      child: Text(
-        _selectButtonMessage,
-        style: const TextStyle(fontSize: 18.0),
-      ),
     );
   }
 }
