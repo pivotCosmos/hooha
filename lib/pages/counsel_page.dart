@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hooha/pages/feedback_function.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
-const String MODEL_ID = 'text-davinci-003';
+const String MODEL_ID = 'gpt-3.5-turbo';
 
 ///Counsel Module
 class GetCounsel extends StatelessWidget {
@@ -55,18 +56,11 @@ class _CounselPageState extends State<CounselPage> {
   final ScrollController _scrollController = ScrollController();
 
   /// 챗봇 말풍선 스타일
-  static const styleChatbot = BubbleStyle(
-    nip: BubbleNip.leftCenter,
-    color: Colors.white,
-    borderColor: Colors.blue,
-    borderWidth: 1,
-    elevation: 4,
-    margin: BubbleEdges.only(
-      top: 10,
-      right: 50,
-      left: 10,
-    ),
-    alignment: Alignment.topLeft,
+  final styleChatbot = BubbleStyle(
+    alignment: Alignment.bottomRight,
+    margin: const BubbleEdges.only(top: 10),
+    nip: BubbleNip.no,
+    color: Colors.blue,
   );
 
   /// 사용자 말풍선 스타일
@@ -134,15 +128,18 @@ class _CounselPageState extends State<CounselPage> {
   /// OpenAI API에서 답변 가져오기
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
+    const message = 'I love you and thank you';
     final response = await http.post(
-      Uri.parse('https://api.openai.com/v1/engines/$MODEL_ID/completions'),
+      Uri.parse('https://api.openai.com/v1/chat//completions'),
       headers: {
         'Authorization': 'Bearer $OPENAI_API_KEY',
         'Content-Type': 'application/json',
-        "model": "text-davinci-003"
       },
       body: jsonEncode({
-        'prompt': message,
+        "model": "gpt-3.5-turbo",
+        "messages": [
+          {"role": "user", "content": message}
+        ],
         'max_tokens': 1000,
         'temperature': 0.5,
       }),
@@ -256,13 +253,34 @@ class SelectButtonMessageContainer extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Color.fromARGB(255, 201, 203, 206),
         borderRadius: BorderRadius.circular(16.0),
       ),
       padding: const EdgeInsets.all(12.0),
       child: Text(
         _selectButtonMessage,
         style: const TextStyle(fontSize: 18.0),
+      ),
+    );
+  }
+}
+
+class ChatbotBubble extends StatelessWidget {
+  final Widget child;
+
+  const ChatbotBubble({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Bubble(
+      alignment: Alignment.topLeft,
+      margin: const BubbleEdges.only(top: 10),
+      nip: BubbleNip.no,
+      color: Color.fromARGB(255, 232, 234, 236),
+      borderWidth: 50,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 150), // 너비 제한
+        child: child,
       ),
     );
   }
@@ -287,19 +305,61 @@ class MessageBubbleListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      controller: _scrollController, // Assign the ScrollController
+      controller: _scrollController,
       itemCount: _messages.length,
       itemBuilder: (context, index) {
         final message = _messages[index];
         final isChatbotMessage = index % 2 == 0;
 
-        return Bubble(
-          style: isChatbotMessage ? styleChatbot : styleMe,
-          child: Text(
-            message,
-            style: const TextStyle(fontSize: 18.0),
-          ),
-        );
+        return isChatbotMessage
+            ? ChatbotBubble(
+                child: Stack(
+                  alignment: Alignment.topLeft,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          message,
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 10, 10, 10),
+                              fontSize: 18.0),
+                        ),
+                        Align(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.thumb_up,
+                                    color: Color.fromARGB(255, 34, 116, 238)),
+                                onPressed: () {
+                                  updatecount('recommended');
+                                },
+                                iconSize: 20,
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.thumb_down,
+                                    color: Color.fromARGB(255, 34, 116, 238)),
+                                onPressed: () {
+                                  showDialogFunction(
+                                      context); // thumb_down 아이콘에 대한 동작 추가
+                                },
+                                iconSize: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            : Bubble(
+                style: styleMe,
+                child: Text(
+                  message,
+                  style: const TextStyle(fontSize: 18.0),
+                ),
+              );
       },
     );
   }
