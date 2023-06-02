@@ -59,7 +59,7 @@ class _MyPageState extends State<MyPage> {
     // Perform the necessary actions to update user information
     // For example, make an API call to update the user information on the server
     // You can access the updated values using _nameController.text, _selectedGender, _quitDate
-  }
+  } //
 
   void toggleNotification(bool value) {
     setState(() {
