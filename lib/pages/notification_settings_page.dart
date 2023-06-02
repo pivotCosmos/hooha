@@ -372,5 +372,5 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         ),
       ),
     );
-  }
+  } //
 }
