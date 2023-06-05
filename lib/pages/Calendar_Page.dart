@@ -155,77 +155,79 @@ class _CalendarPageState extends State<CalendarPage> {
         title: const Text('출석체크'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              '출석 일수: $_attendanceCount일',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              '연속 출석일: $_consecutiveDays일',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _checkAttendance,
-              child: const Text('출석체크'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _resetAttendance, // 수정: 출석체크 기록 초기화 버튼
-              child: const Text('출석체크 기록 초기화'),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CalendarCarousel<Event>(
-                onDayPressed: (DateTime date, List<Event> events) {
-                  setState(() => _currentDate = date);
-                },
-                weekendTextStyle: const TextStyle(
-                  color: Color.fromARGB(255, 36, 128, 205),
-                ),
-                thisMonthDayBorderColor: Colors.grey,
-                markedDatesMap: _markedDateMap,
-                customDayBuilder: (
-                  bool isSelectable,
-                  int index,
-                  bool isSelectedDay,
-                  bool isToday,
-                  bool isPrevMonthDay,
-                  TextStyle textStyle,
-                  bool isNextMonthDay,
-                  bool isThisMonthDay,
-                  DateTime day,
-                ) {
-                  final eventList = _markedDateMap.events[day];
-                  if (eventList != null && eventList.isNotEmpty) {
-                    return Container(
-                      margin: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
-                      ),
-                      child: Center(
-                        child: Text(
-                          day.day.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                '출석 일수: $_attendanceCount일',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                '연속 출석일: $_consecutiveDays일',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _checkAttendance,
+                child: const Text('출석체크'),
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _resetAttendance, // 수정: 출석체크 기록 초기화 버튼
+                child: const Text('출석체크 기록 초기화'),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CalendarCarousel<Event>(
+                  onDayPressed: (DateTime date, List<Event> events) {
+                    setState(() => _currentDate = date);
+                  },
+                  weekendTextStyle: const TextStyle(
+                    color: Color.fromARGB(255, 36, 128, 205),
+                  ),
+                  thisMonthDayBorderColor: Colors.grey,
+                  markedDatesMap: _markedDateMap,
+                  customDayBuilder: (
+                    bool isSelectable,
+                    int index,
+                    bool isSelectedDay,
+                    bool isToday,
+                    bool isPrevMonthDay,
+                    TextStyle textStyle,
+                    bool isNextMonthDay,
+                    bool isThisMonthDay,
+                    DateTime day,
+                  ) {
+                    final eventList = _markedDateMap.events[day];
+                    if (eventList != null && eventList.isNotEmpty) {
+                      return Container(
+                        margin: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
+                        ),
+                        child: Center(
+                          child: Text(
+                            day.day.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  } else {
-                    return null;
-                  }
-                },
-                weekFormat: false,
-                height: 360.0,
-                daysHaveCircularBorder: false,
+                      );
+                    } else {
+                      return null;
+                    }
+                  },
+                  weekFormat: false,
+                  height: 360.0,
+                  daysHaveCircularBorder: false,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

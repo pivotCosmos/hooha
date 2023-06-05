@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hooha/pages/GPS_page.dart';
 import '/pages/Home_page.dart';
 import '/pages/Calendar_Page.dart';
 import '/pages/counsel_page.dart';
-import '/pages/MyPage.dart';
+import '/pages/my_page.dart';
 import '/pages/Notification_page.dart';
+import '/pages/GPS_page.dart';
 
 class NavigationExample extends StatefulWidget {
   const NavigationExample({Key? key}) : super(key: key);
@@ -88,6 +90,10 @@ class _NavigationExampleState extends State<NavigationExample> {
             icon: Icon(Icons.supervised_user_circle_sharp),
             label: 'MyPage',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.compass_calibration),
+            label: 'GPS',
+          ),
         ],
       ),
       body: _buildPage(currentPageIndex), // 수정된 부분
@@ -103,6 +109,8 @@ class _NavigationExampleState extends State<NavigationExample> {
       return const GetCounsel();
     } else if (index == 3) {
       return const MyPage();
+    } else if (index == 4) {
+      return MapSample();
     } else {
       return Container();
     }

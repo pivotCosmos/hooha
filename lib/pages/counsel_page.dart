@@ -45,7 +45,7 @@ class _CounselPageState extends State<CounselPage> {
   List<String> _options = [];
 
   /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들
-  List<String> _nextMessagesNums = ['0'];
+  List<String> _nextMessagesNums = ['_intro'];
 
   /// 다음에 띄워줄 챗봇 메시지 번호 (디폴트 '0')
   //String _nextChatbotMsgNo = '0';
@@ -59,11 +59,18 @@ class _CounselPageState extends State<CounselPage> {
   final ScrollController _scrollController = ScrollController();
 
   /// 챗봇 말풍선 스타일
-  final styleChatbot = BubbleStyle(
-    alignment: Alignment.bottomRight,
-    margin: const BubbleEdges.only(top: 10),
-    nip: BubbleNip.no,
-    color: Colors.blue,
+  static const styleChatbot = BubbleStyle(
+    nip: BubbleNip.leftCenter,
+    color: Colors.white,
+    borderColor: Colors.blue,
+    borderWidth: 1,
+    elevation: 4,
+    margin: BubbleEdges.only(
+      top: 10,
+      right: 50,
+      left: 10,
+    ),
+    alignment: Alignment.topLeft,
   );
 
   /// 사용자 말풍선 스타일
@@ -117,10 +124,12 @@ class _CounselPageState extends State<CounselPage> {
       if (documentSnapshot.exists) {
         // 문서가 존재할 경우 필드 값 가져오기
         String msgTxt = documentSnapshot.get('msg_txt');
+        String formattedMsgTxt =
+            msgTxt.replaceAll(r'\n', '\n'); // "\\n"을 "\n"으로 변경
         String options = documentSnapshot.get('options');
 
         return {
-          'msgTxt': msgTxt,
+          'msgTxt': formattedMsgTxt, // msgTxt에서 formattedMsgTxt로 변경 줄바꿈을 위해
           'options': options,
         }; // 가져온 값 반환
       } else {
@@ -309,21 +318,45 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 사용자에게 제공할 선택지 버튼 생성
-  Widget createOptionButtons(context) {
+  Widget createOptionButtons(BuildContext context) {
     final isChatbotMessage = _messages.length % 2 == 0;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        for (int i = 0; i < _options.length; i++)
-          ElevatedButton(
-            // 챗봇 응답 기다리는 동안 선택지 버튼 비활성화
-            onPressed: isChatbotMessage
-                ? null
-                : () => _showHoohaMsgAndUserOptions(i), // 버튼 인덱스 전달
-            child: Text(_options[i]),
-          ),
-      ],
-    );
+
+    if (_options.length >= 3) {
+      return SizedBox(
+        height: 40,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            for (int i = 0; i < _options.length; i++)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: ElevatedButton(
+                  onPressed: isChatbotMessage
+                      ? null
+                      : () => _showHoohaMsgAndUserOptions(i),
+                  child: Text(_options[i]),
+                ),
+              ),
+          ],
+        ),
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (int i = 0; i < _options.length; i++)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: ElevatedButton(
+                onPressed: isChatbotMessage
+                    ? null
+                    : () => _showHoohaMsgAndUserOptions(i),
+                child: Text(_options[i]),
+              ),
+            ),
+        ],
+      );
+    }
   }
 }
 
@@ -366,10 +399,8 @@ class ChatbotBubble extends StatelessWidget {
       nip: BubbleNip.no,
       color: Color.fromARGB(255, 232, 234, 236),
       borderWidth: 50,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: 150), // 너비 제한
-        child: child,
-      ),
+      // 너비 제한
+      child: child,
     );
   }
 }
@@ -399,55 +430,13 @@ class MessageBubbleListView extends StatelessWidget {
         final message = _messages[index];
         final isChatbotMessage = index % 2 == 0;
 
-        return isChatbotMessage
-            ? ChatbotBubble(
-                child: Stack(
-                  alignment: Alignment.topLeft,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          message,
-                          style: TextStyle(
-                              color: const Color.fromARGB(255, 10, 10, 10),
-                              fontSize: 18.0),
-                        ),
-                        Align(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.thumb_up,
-                                    color: Color.fromARGB(255, 34, 116, 238)),
-                                onPressed: () {
-                                  updatecount('recommended');
-                                },
-                                iconSize: 20,
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.thumb_down,
-                                    color: Color.fromARGB(255, 34, 116, 238)),
-                                onPressed: () {
-                                  showDialogFunction(
-                                      context); // thumb_down 아이콘에 대한 동작 추가
-                                },
-                                iconSize: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            : Bubble(
-                style: styleMe,
-                child: Text(
-                  message,
-                  style: const TextStyle(fontSize: 18.0),
-                ),
-              );
+        return Bubble(
+          style: isChatbotMessage ? styleChatbot : styleMe,
+          child: Text(
+            message,
+            style: const TextStyle(fontSize: 18.0),
+          ),
+        );
       },
     );
   }
