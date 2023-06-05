@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
+import 'package:intl/intl.dart';
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
@@ -92,7 +93,11 @@ class _CounselPageState extends State<CounselPage> {
 
   // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
+    // String currentTime =
+    //     DateFormat('HH:mm').format(DateTime.now()); // 현재 시간을 HH:mm 형식으로 가져옴
+    // String messageWithTime = '$message ($currentTime)'; // 메시지와 시간을 결합
     setState(() {
+      //_messages.add(messageWithTime);
       _messages.add(message);
       Timer(const Duration(milliseconds: 500), () {
         _scrollController.jumpTo(
@@ -331,6 +336,7 @@ class _CounselPageState extends State<CounselPage> {
 }
 
 /// 대화 내용을 담아 채팅창에 띄워줄 버블 리스트뷰
+/// 버블 아래에 현재 시간도 함께 띄워줌
 class MessageBubbleListView extends StatelessWidget {
   const MessageBubbleListView({
     super.key,
@@ -355,12 +361,35 @@ class MessageBubbleListView extends StatelessWidget {
         final message = _messages[index];
         final isChatbotMessage = index % 2 == 0;
 
-        return Bubble(
-          style: isChatbotMessage ? styleChatbot : styleMe,
-          child: Text(
-            message,
-            style: const TextStyle(fontSize: 18.0),
-          ),
+        // 현재 시간 가져오기
+        String currentTime = DateFormat('h:mm a').format(DateTime.now());
+        print("currentTime=$currentTime\n DateTime.now()=$DateTime.now()");
+
+        return Column(
+          children: [
+            // 챗봇 메시지
+            Bubble(
+              style: isChatbotMessage ? styleChatbot : styleMe,
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 18.0),
+              ),
+            ),
+            // 메시지 전송 시간
+            Padding(
+                padding: isChatbotMessage
+                    ? const EdgeInsets.only(top: 8.0, left: 20.0)
+                    : const EdgeInsets.only(top: 8.0, right: 20.0),
+                child: Align(
+                  alignment: isChatbotMessage
+                      ? Alignment.topLeft
+                      : Alignment.bottomRight,
+                  child: Text(
+                    currentTime,
+                    style: const TextStyle(fontSize: 10.0, color: Colors.grey),
+                  ),
+                )),
+          ],
         );
       },
     );
