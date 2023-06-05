@@ -70,6 +70,10 @@ class _NavigationExampleState extends State<NavigationExample> {
             icon: Icon(Icons.supervised_user_circle_sharp),
             label: 'MyPage',
           ),
+          //NavigationDestination(
+          //icon: Icon(Icons.supervised_user_circle_sharp),
+          //label: 'GPS',
+          //),
         ],
       ),
       body: <Widget>[
@@ -77,6 +81,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         const CalendarPage(),
         const CounselPage(),
         MyPage(),
+        //GPSPage(),
       ][currentPageIndex],
     );
   }
