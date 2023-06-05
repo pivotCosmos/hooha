@@ -223,21 +223,28 @@ class _CounselPageState extends State<CounselPage> {
     String nextMsgNo = _nextMessagesNums[buttonIndex];
 
     // 시나리오 혹은 프롬프트로 분기 나누기
-    // 분기 나눈 뒤에 API 호출 부분 주석 해제
 
     // 챗봇 메시지 가져오기 (1.시나리오 2.프롬프트)
-    // 1. 시나리오인 경우 DB에서 가져와서 _messages에 저장
     Map<String, String> msgData = await _getChatbotMsg(nextMsgNo);
     String? msgTxt = msgData['msgTxt'];
-    _addMessage(msgTxt!);
-    print("using nextMsgNo(=$nextMsgNo), msgTxt=$msgTxt");
 
-    // 2. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-    // _getAIResponse(option).then((aiResponse) {
-    //   _addMessage(aiResponse);
-    // }).catchError((error) {
-    //   _addMessage('Error: ${error.toString()}');
-    // });
+    String? msgTxtHead = msgTxt?.substring(0, 6);
+    print("msgTxtHead=$msgTxtHead");
+    String prompt = "prompt";
+    if (msgTxtHead! == prompt) {
+      // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
+      _getAIResponse(option).then((aiResponse) {
+        _addMessage(aiResponse);
+        print("aiResponse=$aiResponse");
+      }).catchError((error) {
+        _addMessage('Error: ${error.toString()}');
+        print("aiResponseError=${error.toString()}");
+      });
+    } else {
+      // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
+      _addMessage(msgTxt!);
+      print("using nextMsgNo(=$nextMsgNo), msgTxt=$msgTxt");
+    }
 
     // 챗봇 메시지에 딸린 선택지 옵션들 담기
     String? options = msgData['options'];
@@ -254,7 +261,7 @@ class _CounselPageState extends State<CounselPage> {
       Map<String, String> optMap = await _getOptionMsgAndNextMsgNo(opt);
       print("optMap=$optMap");
 
-      // 옵션 값 담기
+      // 선택지 텍스트 담기
       String? txt = optMap['optionTxt'];
       optTxtList.add(txt!);
 
