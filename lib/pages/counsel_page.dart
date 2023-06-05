@@ -44,8 +44,8 @@ class _CounselPageState extends State<CounselPage> {
   /// 사용자에게 주어지는 선택지
   List<String> _options = [];
 
-  /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들
-  List<String> _nextMessagesNums = ['0'];
+  /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들(디폴트: _intro)
+  List<String> _nextMessagesNums = ['_intro'];
 
   // 디폴트 세팅들
   final _defaultMessage = '안녕하세요! 후하와 대화를 시작해 볼까요?';
