@@ -21,6 +21,7 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 void main() async {
   await dotenv.load(fileName: 'assets/images/.env');
   await Firebase.initializeApp();
+
   runApp(MyApp());
 }
 
