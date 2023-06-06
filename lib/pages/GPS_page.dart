@@ -17,6 +17,7 @@ class _MapSampleState extends State<MapSample> {
       FlutterLocalNotificationsPlugin();
   LatLng? _destination;
   bool _isAlarmTriggered = false;
+  String _notificationMessage = ''; // 알림 메시지 저장 변수
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _MapSampleState extends State<MapSample> {
     await flutterLocalNotificationsPlugin.show(
       0,
       'You have reached the destination!',
-      'Alarm',
+      _notificationMessage, // 사용자가 입력한 알림 메시지를 사용
       platformChannelSpecifics,
       payload: 'Custom_Sound',
     );
@@ -72,7 +73,7 @@ class _MapSampleState extends State<MapSample> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: LatLng(37.317439546276, 127.12702648557),
-          zoom: 30.0,
+          zoom: 20.0,
         ),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
@@ -99,7 +100,7 @@ class _MapSampleState extends State<MapSample> {
           child: FloatingActionButton.extended(
             onPressed: () {
               if (_destination != null) {
-                _startLocationSubscription();
+                _showNotificationDialog(); // 알림 메시지 설정 다이얼로그 표시
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -113,6 +114,40 @@ class _MapSampleState extends State<MapSample> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showNotificationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Set Notification Message'),
+          content: TextField(
+            onChanged: (value) {
+              setState(() {
+                _notificationMessage = value; // 입력한 알림 메시지를 저장
+              });
+            },
+            decoration: InputDecoration(hintText: 'Enter notification message'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _startLocationSubscription();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

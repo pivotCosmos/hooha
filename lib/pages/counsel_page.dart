@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:hooha/pages/feedback_function.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
+import 'package:intl/intl.dart';
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
@@ -44,15 +46,11 @@ class _CounselPageState extends State<CounselPage> {
   /// 사용자에게 주어지는 선택지
   List<String> _options = [];
 
-  /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들
+  /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들(디폴트: _intro)
   List<String> _nextMessagesNums = ['_intro'];
-
-  /// 다음에 띄워줄 챗봇 메시지 번호 (디폴트 '0')
-  //String _nextChatbotMsgNo = '0';
 
   // 디폴트 세팅들
   final _defaultMessage = '안녕하세요! 후하와 대화를 시작해 볼까요?';
-  final _selectButtonMessage = 'Select a button';
   final _defaultOptions = ['좋아요!'];
 
   /// 자동으로 스크롤이 내려가게 하기 위한 스크롤컨트롤러
@@ -96,10 +94,16 @@ class _CounselPageState extends State<CounselPage> {
 
   // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
+    // String currentTime =
+    //     DateFormat('HH:mm').format(DateTime.now()); // 현재 시간을 HH:mm 형식으로 가져옴
+    // String messageWithTime = '$message ($currentTime)'; // 메시지와 시간을 결합
     setState(() {
+      //_messages.add(messageWithTime);
       _messages.add(message);
-      _scrollController.jumpTo(
-          _scrollController.position.maxScrollExtent); // Scroll to the bottom
+      Timer(const Duration(milliseconds: 500), () {
+        _scrollController.jumpTo(
+            _scrollController.position.maxScrollExtent); // Scroll to the bottom
+      });
     });
   }
 
@@ -230,21 +234,28 @@ class _CounselPageState extends State<CounselPage> {
     String nextMsgNo = _nextMessagesNums[buttonIndex];
 
     // 시나리오 혹은 프롬프트로 분기 나누기
-    // 분기 나눈 뒤에 API 호출 부분 주석 해제
 
     // 챗봇 메시지 가져오기 (1.시나리오 2.프롬프트)
-    // 1. 시나리오인 경우 DB에서 가져와서 _messages에 저장
     Map<String, String> msgData = await _getChatbotMsg(nextMsgNo);
     String? msgTxt = msgData['msgTxt'];
-    _addMessage(msgTxt!);
-    print("using nextMsgNo(=$nextMsgNo), msgTxt=$msgTxt");
 
-    // 2. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-    // _getAIResponse(option).then((aiResponse) {
-    //   _addMessage(aiResponse);
-    // }).catchError((error) {
-    //   _addMessage('Error: ${error.toString()}');
-    // });
+    String? msgTxtHead = msgTxt?.substring(0, 6);
+    print("msgTxtHead=$msgTxtHead");
+    String prompt = "prompt";
+    if (msgTxtHead! == prompt) {
+      // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
+      _getAIResponse(option).then((aiResponse) {
+        _addMessage(aiResponse);
+        print("aiResponse=$aiResponse");
+      }).catchError((error) {
+        _addMessage('Error: ${error.toString()}');
+        print("aiResponseError=${error.toString()}");
+      });
+    } else {
+      // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
+      _addMessage(msgTxt!);
+      print("using nextMsgNo(=$nextMsgNo), msgTxt=$msgTxt");
+    }
 
     // 챗봇 메시지에 딸린 선택지 옵션들 담기
     String? options = msgData['options'];
@@ -261,7 +272,7 @@ class _CounselPageState extends State<CounselPage> {
       Map<String, String> optMap = await _getOptionMsgAndNextMsgNo(opt);
       print("optMap=$optMap");
 
-      // 옵션 값 담기
+      // 선택지 텍스트 담기
       String? txt = optMap['optionTxt'];
       optTxtList.add(txt!);
 
@@ -302,14 +313,8 @@ class _CounselPageState extends State<CounselPage> {
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                SelectButtonMessageContainer(
-                    selectButtonMessage: _selectButtonMessage),
-                Builder(
-                  builder: createOptionButtons,
-                ),
-              ],
+            child: Builder(
+              builder: createOptionButtons,
             ),
           ),
         ],
@@ -360,52 +365,8 @@ class _CounselPageState extends State<CounselPage> {
   }
 }
 
-/// 버튼 상단에 띄워줄 안내 메시지
-class SelectButtonMessageContainer extends StatelessWidget {
-  const SelectButtonMessageContainer({
-    super.key,
-    required String selectButtonMessage,
-  }) : _selectButtonMessage = selectButtonMessage;
-
-  final String _selectButtonMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 201, 203, 206),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      padding: const EdgeInsets.all(12.0),
-      child: Text(
-        _selectButtonMessage,
-        style: const TextStyle(fontSize: 18.0),
-      ),
-    );
-  }
-}
-
-class ChatbotBubble extends StatelessWidget {
-  final Widget child;
-
-  const ChatbotBubble({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Bubble(
-      alignment: Alignment.topLeft,
-      margin: const BubbleEdges.only(top: 10),
-      nip: BubbleNip.no,
-      color: Color.fromARGB(255, 232, 234, 236),
-      borderWidth: 50,
-      // 너비 제한
-      child: child,
-    );
-  }
-}
-
 /// 대화 내용을 담아 채팅창에 띄워줄 버블 리스트뷰
+/// 버블 아래에 현재 시간도 함께 띄워줌
 class MessageBubbleListView extends StatelessWidget {
   const MessageBubbleListView({
     super.key,
@@ -430,12 +391,35 @@ class MessageBubbleListView extends StatelessWidget {
         final message = _messages[index];
         final isChatbotMessage = index % 2 == 0;
 
-        return Bubble(
-          style: isChatbotMessage ? styleChatbot : styleMe,
-          child: Text(
-            message,
-            style: const TextStyle(fontSize: 18.0),
-          ),
+        // 현재 시간 가져오기
+        String currentTime = DateFormat('h:mm a').format(DateTime.now());
+        print("currentTime=$currentTime\n DateTime.now()=$DateTime.now()");
+
+        return Column(
+          children: [
+            // 챗봇 메시지
+            Bubble(
+              style: isChatbotMessage ? styleChatbot : styleMe,
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 18.0),
+              ),
+            ),
+            // 메시지 전송 시간
+            Padding(
+                padding: isChatbotMessage
+                    ? const EdgeInsets.only(top: 8.0, left: 20.0)
+                    : const EdgeInsets.only(top: 8.0, right: 20.0),
+                child: Align(
+                  alignment: isChatbotMessage
+                      ? Alignment.topLeft
+                      : Alignment.bottomRight,
+                  child: Text(
+                    currentTime,
+                    style: const TextStyle(fontSize: 10.0, color: Colors.grey),
+                  ),
+                )),
+          ],
         );
       },
     );
