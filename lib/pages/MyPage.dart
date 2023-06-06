@@ -11,10 +11,9 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> {
   TextEditingController _nameController = TextEditingController();
-  String? _selectedGender;
+  bool _isMaleSelected = false;
+  bool _isFemaleSelected = false;
   DateTime? _quitDate;
-  List<String> _genders = ['남성', '여성'];
-  List<bool> _isSelected = [false, false];
 
   DateTime dateTime = DateTime.now(); // 사용자가 선택한 시간을 저장
 
@@ -28,7 +27,9 @@ class _MyPageState extends State<MyPage> {
     final sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       _nameController.text = sharedPreferences.getString('name') ?? '';
-      _selectedGender = sharedPreferences.getString('gender');
+      _isMaleSelected = sharedPreferences.getBool('isMaleSelected') ?? false;
+      _isFemaleSelected =
+          sharedPreferences.getBool('isFemaleSelected') ?? false;
       final quitDateMilliseconds = sharedPreferences.getInt('quitDate');
       _quitDate = quitDateMilliseconds != null
           ? DateTime.fromMillisecondsSinceEpoch(quitDateMilliseconds)
@@ -39,7 +40,8 @@ class _MyPageState extends State<MyPage> {
   Future<void> _saveUserInformation() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString('name', _nameController.text);
-    sharedPreferences.setString('gender', _selectedGender ?? '');
+    sharedPreferences.setBool('isMaleSelected', _isMaleSelected);
+    sharedPreferences.setBool('isFemaleSelected', _isFemaleSelected);
     if (_quitDate != null) {
       sharedPreferences.setInt('quitDate', _quitDate!.millisecondsSinceEpoch);
     } else {
@@ -57,15 +59,6 @@ class _MyPageState extends State<MyPage> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
-  }
-
-  void _selectGender(int index) {
-    setState(() {
-      for (int i = 0; i < _isSelected.length; i++) {
-        _isSelected[i] = (i == index);
-      }
-      _selectedGender = _isSelected[index] ? _genders[index] : null;
-    });
   }
 
   @override
@@ -112,8 +105,18 @@ class _MyPageState extends State<MyPage> {
                         ),
                       ),
                       ToggleButtons(
-                        isSelected: _isSelected,
-                        onPressed: _selectGender,
+                        isSelected: [_isMaleSelected, _isFemaleSelected],
+                        onPressed: (int index) {
+                          setState(() {
+                            if (index == 0) {
+                              _isMaleSelected = !_isMaleSelected;
+                              _isFemaleSelected = false;
+                            } else if (index == 1) {
+                              _isMaleSelected = false;
+                              _isFemaleSelected = !_isFemaleSelected;
+                            }
+                          });
+                        },
                         children: [
                           Text('남성'),
                           Text('여성'),
@@ -151,13 +154,6 @@ class _MyPageState extends State<MyPage> {
                         const SnackBar(content: Text('정보가 저장되었습니다.')),
                       );
                       // 토글 버튼 상태에 따라 선택된 성별 설정
-                      setState(() {
-                        _selectedGender = _isSelected[0]
-                            ? _genders[0]
-                            : _isSelected[1]
-                                ? _genders[1]
-                                : null;
-                      });
                     },
                     child: const Text('저장'),
                   ),
