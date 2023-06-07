@@ -5,7 +5,6 @@ import '/pages/Calendar_Page.dart';
 import '/pages/counsel_page.dart';
 import '/pages/MyPage.dart';
 import '/pages/Notification_page.dart';
-import '/pages/GPS_page.dart';
 
 class NavigationExample extends StatefulWidget {
   const NavigationExample({Key? key}) : super(key: key);
