@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, duplicate_ignore
 
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
@@ -6,6 +6,8 @@ import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+
+import '/pages/Journal_Page.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({Key? key}) : super(key: key);
@@ -18,7 +20,6 @@ class _CalendarPageState extends State<CalendarPage> {
   int _attendanceCount = 0;
   int _consecutiveDays = 0;
   bool _isAttendanceCompleted = false;
-  // ignore: unused_field
   DateTime _currentDate = DateTime.now();
 
   final EventList<Event> _markedDateMap = EventList<Event>(events: {});
@@ -131,6 +132,7 @@ class _CalendarPageState extends State<CalendarPage> {
     sharedPreferences.remove('isAttendanceCompleted');
     sharedPreferences.remove('lastAttendanceDate');
 
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -148,14 +150,28 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  void _writeJournal() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => JournalPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('출석체크'),
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: const Text(
+          '출석체크',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -168,15 +184,26 @@ class _CalendarPageState extends State<CalendarPage> {
                 style: const TextStyle(fontSize: 18.0),
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _checkAttendance,
-                child: const Text('출석체크'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _checkAttendance,
+                    child: const Text('출석체크'),
+                  ),
+                  const SizedBox(width: 16.0),
+                  ElevatedButton(
+                    onPressed: _resetAttendance,
+                    child: const Text('출석체크 기록 초기화'),
+                  ),
+                ],
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: _resetAttendance, // 수정: 출석체크 기록 초기화 버튼
-                child: const Text('출석체크 기록 초기화'),
+                onPressed: _writeJournal,
+                child: const Text('일지 작성'),
               ),
+              const SizedBox(height: 16.0),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: CalendarCarousel<Event>(

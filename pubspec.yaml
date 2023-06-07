@@ -39,10 +39,10 @@ dependencies:
   http: ^0.13.6
   flutter_dotenv: ^5.0.2
   bubble: ^1.2.1
-  get: ^4.6.5
-  firebase_core: ^2.13.0
+ 
+  
   change_app_package_name: ^1.1.0
-  cloud_firestore: ^4.8.0
+  
   shared_preferences: ^2.1.1
   firebase_auth: ^4.6.2
   dotenv: ^4.1.0
@@ -54,9 +54,24 @@ dependencies:
   latlng: ^1.0.0
   google_maps_flutter: ^2.0.1
   location: ^4.4.0
+  firebase_core: ^2.13.1
+  get: ^4.6.5
+  flutter_localizations:
+    sdk: flutter
+  
+  
+  firebase_ui_auth: ^1.0.6
+  google_sign_in: ^6.1.2
+  provider: ^6.0.5
+  kakao_flutter_sdk: ^1.4.1 
+  kakao_flutter_sdk_user: ^1.4.3
+  cloud_firestore: ^4.8.0
 
   
-  intl: ^0.18.1
+
+  
+  intl: ^0.18.0
+  firebase_analytics: ^10.4.2
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +104,7 @@ flutter:
     - assets/images/3rd.png
     - assets/images/4th.png
     - assets/images/5th.png
+    - assets/images/LoginPagePicture.png
     - assets/images/.env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

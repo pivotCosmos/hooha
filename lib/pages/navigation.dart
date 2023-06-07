@@ -3,7 +3,7 @@ import 'package:hooha/pages/GPS_page.dart';
 import '/pages/Home_page.dart';
 import '/pages/Calendar_Page.dart';
 import '/pages/counsel_page.dart';
-import '/pages/my_page.dart';
+import '/pages/MyPage.dart';
 import '/pages/Notification_page.dart';
 import '/pages/GPS_page.dart';
 

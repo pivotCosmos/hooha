@@ -44,6 +44,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+<<<<<<< HEAD
 =======
 # Miscellaneous
 *.class
@@ -139,3 +140,8 @@ app.*.map.json
 # API related
 assets/config/.env
 >>>>>>> aa45a778c9f90083b3b8071772922d5d7cd5a1ad
+=======
+
+google-services.json
+firebase_options.dart
+>>>>>>> c65b806d9dc7063d97fb70a1c0a070e1aa875bb5

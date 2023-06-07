@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '/pages/navigation.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
 enum Gender { male, female }
 
@@ -19,26 +22,78 @@ class _InputInfoPageState extends State<InputInfoPage> {
   TextEditingController _nameController = TextEditingController();
   Gender? _selectedGender;
   DateTime? _selectedDate;
+  String? _selectedJob;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserInformation();
+  }
+
+  Future<void> _checkUserInformation() async {
+    final kakao.User user = await kakao.UserApi.instance.me();
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+
+    final userFromFirestore = await userDocRef.get();
+    if (userFromFirestore.exists) {
+      // 사용자 정보가 이미 있으면 InputInfoPage를 건너뛰고 다음 페이지로 이동
+      _navigateToMainPage();
+    }
+  }
 
   Future<void> _saveUserInformation() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('name', _nameController.text);
-    sharedPreferences.setString(
-        'gender', _selectedGender.toString().split('.').last);
-    if (_selectedDate != null) {
-      sharedPreferences.setInt(
-          'quitDate', _selectedDate!.millisecondsSinceEpoch);
+    if (_selectedJob == null) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('경고'),
+            content: Text('직업을 선택해주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    final kakao.User user = await kakao.UserApi.instance.me();
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+
+    final userFromFirestore = await userDocRef.get();
+    if (!userFromFirestore.exists) {
+      await userDocRef.set({
+        'userId': user.id.toString(),
+        'displayName': user.kakaoAccount?.profile?.nickname,
+        'email': user.kakaoAccount?.email,
+        'name': _nameController.text,
+        'gender': _selectedGender == Gender.male ? 'male' : 'female',
+        'quitDate': _selectedDate != null
+            ? _selectedDate!.millisecondsSinceEpoch
+            : null,
+        'job': _selectedJob,
+      });
     }
     if (widget.onInfoEntered != null) {
       widget.onInfoEntered!(); // onInfoEntered 콜백 호출
     }
+
+    _navigateToMainPage();
   }
 
   void _navigateToMainPage() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const NavigationExample(),
+        builder: (context) => NavigationExample(), // 다음 페이지로 이동
       ),
     );
   }
@@ -112,6 +167,86 @@ class _InputInfoPageState extends State<InputInfoPage> {
                 ],
               ),
               const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () async {
+                  final selectedJob = await showDialog<String>(
+                    context: context,
+                    builder: (context) {
+                      String? job;
+                      return AlertDialog(
+                        title: Text('직업 선택'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            RadioListTile<String>(
+                              title: const Text('직장인'),
+                              value: '직장인',
+                              groupValue: job,
+                              onChanged: (value) {
+                                job = value;
+                              },
+                            ),
+                            RadioListTile<String>(
+                              title: const Text('학생'),
+                              value: '학생',
+                              groupValue: job,
+                              onChanged: (value) {
+                                job = value;
+                              },
+                            ),
+                            RadioListTile<String>(
+                              title: const Text('주부'),
+                              value: '주부',
+                              groupValue: job,
+                              onChanged: (value) {
+                                job = value;
+                              },
+                            ),
+                            RadioListTile<String>(
+                              title: const Text('군인'),
+                              value: '군인',
+                              groupValue: job,
+                              onChanged: (value) {
+                                job = value;
+                              },
+                            ),
+                            RadioListTile<String>(
+                              title: const Text('무직'),
+                              value: '무직',
+                              groupValue: job,
+                              onChanged: (value) {
+                                job = value;
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, null);
+                            },
+                            child: Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, job);
+                            },
+                            child: Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  setState(() {
+                    _selectedJob = selectedJob;
+                  });
+                },
+                child: Text(
+                  _selectedJob != null ? '직업: $_selectedJob' : '직업 선택',
+                ),
+              ),
+              const SizedBox(height: 16.0),
               TextButton(
                 onPressed: () async {
                   final DateTime? pickedDate = await showDatePicker(
@@ -137,9 +272,9 @@ class _InputInfoPageState extends State<InputInfoPage> {
                 onPressed: () {
                   if (_formKey.currentState?.validate() == true &&
                       _selectedGender != null &&
-                      _selectedDate != null) {
+                      _selectedDate != null &&
+                      _selectedJob != null) {
                     _saveUserInformation();
-                    _navigateToMainPage();
                   }
                 },
                 child: const Text('입력'),

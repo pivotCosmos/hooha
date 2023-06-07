@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "hooha-app",
+    "using": "hooha-app"
+  },
+  "targets": {},
+  "etags": {
+    "hooha-app": {
+      "extensionInstances": {}
+    }
+  }
+}

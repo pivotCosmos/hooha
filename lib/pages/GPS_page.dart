@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:typed_data';
 
 class MapSample extends StatefulWidget {
   @override
@@ -47,19 +48,21 @@ class _MapSampleState extends State<MapSample> {
   }
 
   Future<void> showNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'channel_id',
       'channel_name',
       importance: Importance.high,
       priority: Priority.high,
-      icon: 'ic_launcher',
+      icon: '@mipmap/ic_launcher',
+      vibrationPattern:
+          Int64List.fromList([0, 1000, 500, 1000, 500, 1000]), //알림 진동 설정
     );
-    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
       0,
-      'You have reached the destination!',
+      '고객님께서 지정한 흡연구역입니다!',
       _notificationMessage, // 사용자가 입력한 알림 메시지를 사용
       platformChannelSpecifics,
       payload: 'Custom_Sound',
@@ -69,6 +72,12 @@ class _MapSampleState extends State<MapSample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Center(child: Text('피하고 싶은 흡연구역이 있나요?')),
+
+        backgroundColor: Color.fromARGB(255, 74, 236, 101),
+        elevation: 0, // 여백이 나타나지 않도록 함
+      ),
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
@@ -104,12 +113,12 @@ class _MapSampleState extends State<MapSample> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Please set a destination first.'),
+                    content: Text('피하고 싶은 흡연장소를 먼저 지정해 주세요.'),
                   ),
                 );
               }
             },
-            label: Text('Set Destination'),
+            label: Text('흡연구역 지정'),
             icon: Icon(Icons.place),
           ),
         ),
@@ -122,24 +131,24 @@ class _MapSampleState extends State<MapSample> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Set Notification Message'),
+          title: Text('자신에게 동기부여를 해보세요'),
           content: TextField(
             onChanged: (value) {
               setState(() {
                 _notificationMessage = value; // 입력한 알림 메시지를 저장
               });
             },
-            decoration: InputDecoration(hintText: 'Enter notification message'),
+            decoration: InputDecoration(hintText: 'ex) 초심을 잊지말자!'),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('OK'),
+              child: Text('확인'),
               onPressed: () {
                 Navigator.of(context).pop();
                 _startLocationSubscription();
@@ -164,6 +173,7 @@ class _MapSampleState extends State<MapSample> {
     });
   }
 
+  //100m 이내 오면 울림
   bool _isWithinRange(double latitude, double longitude) {
     const double range = 100; // 100 meters
     double distance = Geolocator.distanceBetween(

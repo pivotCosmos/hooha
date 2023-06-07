@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hooha/pages/feedback_function.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
@@ -306,16 +306,26 @@ class _CounselPageState extends State<CounselPage> {
         children: [
           Expanded(
             child: MessageBubbleListView(
-                scrollController: _scrollController,
-                messages: _messages,
-                styleChatbot: styleChatbot,
-                styleMe: styleMe),
+              scrollController: _scrollController,
+              messages: _messages,
+              styleChatbot: styleChatbot,
+              styleMe: styleMe,
+            ),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              color: Colors.grey[300],
+              child: Text(
+                '버튼이 너무 길 경우 드래그 해주세요',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
           ),
           Container(
             padding: const EdgeInsets.all(8.0),
-            child: Builder(
-              builder: createOptionButtons,
-            ),
+            child: createOptionButtons(context),
           ),
         ],
       ),
@@ -325,8 +335,18 @@ class _CounselPageState extends State<CounselPage> {
   /// 사용자에게 제공할 선택지 버튼 생성
   Widget createOptionButtons(BuildContext context) {
     final isChatbotMessage = _messages.length % 2 == 0;
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool shouldScroll = false;
 
-    if (_options.length >= 3) {
+    for (String buttonText in _options) {
+      double textWidth = buttonText.length * 16.0; // 가상의 텍스트 너비 계산
+      if (textWidth > screenWidth / 2) {
+        shouldScroll = true;
+        break;
+      }
+    }
+
+    if (shouldScroll) {
       return SizedBox(
         height: 40,
         child: ListView(
