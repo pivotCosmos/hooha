@@ -15,7 +15,7 @@ class NotificationSettingsPage extends StatefulWidget {
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   DateTime dateTime = DateTime.now();
   DateTime dateTime2 = DateTime.now();
-  // DateTime endTime = DateTime.now();
+  DateTime endTime = DateTime.now();
   bool isNotificationEnabled = false; // 격려 알림 시작 활성화 체크
   bool isNotificationEnabled2 = false; // 금연여부 알림 활성화 체크
   bool isCancelEnable = false; // 격려 알림 종료 활성화 체크
@@ -52,14 +52,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     });
   }
 
-  // void toggleCancelNotification(bool value) {
-  //   setState(() {
-  //     isCancelEnable = value;
-  //     if (isCancelEnable == true) {
-  //       cancelNotification();
-  //     }
-  //   });
-  // }
+  void toggleCancelNotification(bool value) {
+    setState(() {
+      isCancelEnable = value;
+      if (isCancelEnable == true) {
+        cancelNotification();
+      }
+    });
+  }
 
   Future<void> cancelNotification() async {
     await flutterLocalNotificationsPlugin.cancel(notificationId);
@@ -365,7 +365,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               ),
             ],
           ),
-          /*Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(child: Text('격려 알림 종료: ')),
@@ -409,7 +409,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 ),
               ),
             ],
-          ),*/
+          ),
           Container(
             margin: const EdgeInsets.all(8),
             child: TextField(
