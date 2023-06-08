@@ -22,11 +22,29 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final TextEditingController _controller = TextEditingController();
+  late SharedPreferences prefs; // 추가: SharedPreferences 인스턴스
 
   @override
   void initState() {
     super.initState();
     initializeNotifications();
+    loadNotificationSettings(); // 추가: 저장된 알림 설정 값 로드
+  }
+
+  // 추가: 저장된 알림 설정 값 로드
+  Future<void> loadNotificationSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isNotificationEnabled = prefs.getBool('notificationEnabled') ?? false;
+      isNotificationEnabled2 = prefs.getBool('notificationEnabled2') ?? false;
+    });
+  }
+
+  // 추가: 알림 설정 값 저장
+  Future<void> saveNotificationSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setBool('notificationEnabled', isNotificationEnabled);
+    prefs.setBool('notificationEnabled2', isNotificationEnabled2);
   }
 
   void toggleNotification(bool value) {
@@ -37,6 +55,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       } else {
         cancelNotification();
       }
+      saveNotificationSettings(); // 추가: 알림 설정 값 저장
     });
   }
 
@@ -48,6 +67,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       } else {
         cancelNotification();
       }
+      saveNotificationSettings(); // 추가: 알림 설정 값 저장
     });
   }
 
@@ -98,7 +118,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       '로컬 푸시 알림',
-      '설정한 시간입니다!',
+      '출석체크 설정한 시간입니다!',
       nextDay,
       platformChannelSpecifics,
       //androidAllowWhileIdle: true,
