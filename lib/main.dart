@@ -29,7 +29,7 @@ void main() async {
   //임의로 로그인 관련 기능 전부 주석처리함 로그인기능하려면 주석 풀고
   //밑에 @override 아래 위젯부분 지우면 됨
 
-  /* WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   kakao.KakaoSdk.init(nativeAppKey: 'f4797bdadfc6cd9c0ec4bfd879d8337b');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -41,7 +41,7 @@ void main() async {
   if (isLoggedOut) {
     await kakao.UserApi.instance.logout();
     prefs.setBool('isLoggedOut', false);
-  }*/
+  }
   ;
   await Firebase.initializeApp();
 
@@ -53,14 +53,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: NavigationExample(),
-    );
-  }
-  /*
-  @override
-  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HOOHA',
       debugShowCheckedModeBanner: false,
@@ -69,9 +61,9 @@ class MyApp extends StatelessWidget {
       ),
       home: LoginPage(kaKaoLogin: KakaoLogin()),
     );
-  }*/
+  }
 
-  /* Future<bool> checkUserInformationExists() async {
+  Future<bool> checkUserInformationExists() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     final name = sharedPreferences.getString('name');
     final gender = sharedPreferences.getString('gender');
@@ -83,5 +75,5 @@ class MyApp extends StatelessWidget {
     } else {
       return false; // 사용자 정보가 존재하지 않으면 false 반환
     }
-  }*/
+  }
 }
