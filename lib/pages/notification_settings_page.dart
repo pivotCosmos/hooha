@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationSettingsPage extends StatefulWidget {
   NotificationSettingsPage({Key? key}) : super(key: key);
@@ -92,7 +93,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         tz.TZDateTime.from(dateTime2, tz.local); // 사용자가 설정한 시간을 가져온다.
 
     // 다음 날의 동일한 시간으로 설정
-    var nextDay = scheduledDate.add(const Duration(minutes: 1));
+    var nextDay = scheduledDate.add(const Duration(minutes: 0));
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
@@ -372,5 +373,5 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         ),
       ),
     );
-  } //
+  }
 }
