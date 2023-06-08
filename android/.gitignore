@@ -1,7 +1,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> aa45a778c9f90083b3b8071772922d5d7cd5a1ad
+=======
+>>>>>>> 6b58ac6bebebb35021f7a0980e4442780c807686
 gradle-wrapper.jar
 /.gradle
 /captures/
@@ -16,6 +19,7 @@ key.properties
 **/*.keystore
 <<<<<<< HEAD
 **/*.jks
+<<<<<<< HEAD
 =======
 gradle-wrapper.jar
 /.gradle
@@ -34,3 +38,5 @@ key.properties
 =======
 **/*.jks
 >>>>>>> aa45a778c9f90083b3b8071772922d5d7cd5a1ad
+=======
+>>>>>>> 6b58ac6bebebb35021f7a0980e4442780c807686

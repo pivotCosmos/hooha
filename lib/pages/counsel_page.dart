@@ -318,7 +318,7 @@ class _CounselPageState extends State<CounselPage> {
               padding: EdgeInsets.all(8.0),
               color: Colors.grey[300],
               child: Text(
-                '버튼이 너무 길 경우 드래그 해주세요',
+                '버튼이 너무 길 경우 스와이프 해주세요',
                 style: TextStyle(fontSize: 14.0),
               ),
             ),
@@ -337,10 +337,10 @@ class _CounselPageState extends State<CounselPage> {
     final isChatbotMessage = _messages.length % 2 == 0;
     double screenWidth = MediaQuery.of(context).size.width;
     bool shouldScroll = false;
-
+    //너무 버튼이 길거나 버튼 갯수가 3개 이상일 때는 스와이프
     for (String buttonText in _options) {
       double textWidth = buttonText.length * 16.0; // 가상의 텍스트 너비 계산
-      if (textWidth > screenWidth / 2) {
+      if (textWidth > screenWidth / 2 || _options.length >= 3) {
         shouldScroll = true;
         break;
       }

@@ -1,7 +1,10 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> aa45a778c9f90083b3b8071772922d5d7cd5a1ad
+=======
+>>>>>>> 6b58ac6bebebb35021f7a0980e4442780c807686
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- The INTERNET permission is required for development. Specifically,
          the Flutter tool needs it to communicate with the running application
@@ -9,6 +12,7 @@
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 =======
@@ -21,3 +25,5 @@
 </manifest>
 >>>>>>> 4c39a0e5b83d92c351e69461158a3eaa8aa426bf
 >>>>>>> aa45a778c9f90083b3b8071772922d5d7cd5a1ad
+=======
+>>>>>>> 6b58ac6bebebb35021f7a0980e4442780c807686

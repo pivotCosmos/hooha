@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:typed_data';
 
@@ -18,12 +19,14 @@ class _MapSampleState extends State<MapSample> {
       FlutterLocalNotificationsPlugin();
   LatLng? _destination;
   bool _isAlarmTriggered = false;
-  String _notificationMessage = ''; // 알림 메시지 저장 변수
+  String _notificationMessage = '';
 
   @override
   void initState() {
     super.initState();
     initializeNotifications();
+    loadSavedDestination();
+    _getCurrentLocation(); // 현재 위치 가져오기
   }
 
   @override
@@ -55,15 +58,14 @@ class _MapSampleState extends State<MapSample> {
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
-      vibrationPattern:
-          Int64List.fromList([0, 1000, 500, 1000, 500, 1000]), //알림 진동 설정
+      vibrationPattern: Int64List.fromList([0, 1000, 500, 1000, 500, 1000]),
     );
     NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
       0,
       '고객님께서 지정한 흡연구역입니다!',
-      _notificationMessage, // 사용자가 입력한 알림 메시지를 사용
+      _notificationMessage,
       platformChannelSpecifics,
       payload: 'Custom_Sound',
     );
@@ -73,15 +75,15 @@ class _MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // 뒤로가기 버튼 비활성화
         title: Center(child: Text('피하고 싶은 흡연구역이 있나요?')),
-
         backgroundColor: Color.fromARGB(255, 74, 236, 101),
-        elevation: 0, // 여백이 나타나지 않도록 함
+        elevation: 0,
       ),
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
-          target: LatLng(37.317439546276, 127.12702648557),
+          target: _destination ?? LatLng(37.317439546276, 127.12702648557),
           zoom: 20.0,
         ),
         onMapCreated: (GoogleMapController controller) {
@@ -93,6 +95,7 @@ class _MapSampleState extends State<MapSample> {
           setState(() {
             _destination = position;
           });
+          saveDestination(position); // 마커를 탭할 때마다 목적지 위치를 저장
         },
         markers: Set<Marker>.from([
           if (_destination != null)
@@ -109,7 +112,7 @@ class _MapSampleState extends State<MapSample> {
           child: FloatingActionButton.extended(
             onPressed: () {
               if (_destination != null) {
-                _showNotificationDialog(); // 알림 메시지 설정 다이얼로그 표시
+                _showNotificationDialog();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -135,7 +138,7 @@ class _MapSampleState extends State<MapSample> {
           content: TextField(
             onChanged: (value) {
               setState(() {
-                _notificationMessage = value; // 입력한 알림 메시지를 저장
+                _notificationMessage = value;
               });
             },
             decoration: InputDecoration(hintText: 'ex) 초심을 잊지말자!'),
@@ -173,9 +176,8 @@ class _MapSampleState extends State<MapSample> {
     });
   }
 
-  //100m 이내 오면 울림
   bool _isWithinRange(double latitude, double longitude) {
-    const double range = 100; // 100 meters
+    const double range = 100;
     double distance = Geolocator.distanceBetween(
       latitude,
       longitude,
@@ -183,5 +185,56 @@ class _MapSampleState extends State<MapSample> {
       _destination!.longitude,
     );
     return distance <= range;
+  }
+
+  Future<void> saveDestination(LatLng position) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('destination_latitude', position.latitude);
+    await prefs.setDouble('destination_longitude', position.longitude);
+  }
+
+  Future<void> loadSavedDestination() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    double? latitude = prefs.getDouble('destination_latitude');
+    double? longitude = prefs.getDouble('destination_longitude');
+    if (latitude != null && longitude != null) {
+      setState(() {
+        _destination = LatLng(latitude, longitude);
+      });
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await _location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    LocationData currentLocation = await _location.getLocation();
+    if (!_isAlarmTriggered &&
+        _isWithinRange(currentLocation.latitude!, currentLocation.longitude!)) {
+      _isAlarmTriggered = true;
+      showNotification();
+    }
+
+    setState(() {
+      _destination =
+          LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    });
+    saveDestination(_destination!);
   }
 }
