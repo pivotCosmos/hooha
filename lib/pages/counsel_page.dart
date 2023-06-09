@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
 import 'package:intl/intl.dart';
 import 'package:hooha/services/firebase_analytics.dart' as analytics;
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart' as kakao;
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
@@ -256,6 +257,11 @@ class _CounselPageState extends State<CounselPage> {
   /// option: 사용자가 클릭한 선택지 버튼 텍스트.
   /// index: 사용자가 클릭한 버튼 인덱스
   void _showHoohaMsgAndUserOptions(int buttonIndex) async {
+    final kakao.User user =
+        await kakao.UserApi.instance.me(); //현재 로그인된 카카오 유저의 정보를 가져옴
+    final userDocRef = //파이어스토어의 users 객체의 userid 문서의 정보 저장
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+
     print("Start of _showHoohaMsgAndUserOptions");
     analytics.AnalyticsService.analytics.setAnalyticsCollectionEnabled(true);
     // 직전 선택지에 딸려있었던 메시지들 확인하기
@@ -299,7 +305,7 @@ class _CounselPageState extends State<CounselPage> {
 
       // 회원 아이디로 회원정보 가져오기
       // 필요한 회원정보: 회원 유형, 회원 아이디
-      Map<String, String> userData = await _getUserInfo('userId입력');
+      Map<String, String> userData = await _getUserInfo('${user.id}');
       String? name = userData['name'];
       String? job = userData['job'];
 
