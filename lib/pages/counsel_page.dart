@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
 import 'package:intl/intl.dart';
+import 'package:hooha/services/firebase_analytics.dart' as analytics;
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
@@ -45,8 +46,8 @@ class _CounselPageState extends State<CounselPage> {
   /// 사용자에게 주어지는 선택지
   List<String> _options = [];
 
-  /// 선택지 버튼을 클릭하면 이어질 챗봇 메시지 번호들(디폴트: _intro)
-  List<String> _nextMessagesNums = ['_intro'];
+  /// 선택지 버튼을 클릭하면 이어질 각각의 챗봇 메시지 이름들(디폴트: _intro)
+  List<String> _nextMessageNames = ['_intro'];
 
   // 디폴트 세팅들
   final _defaultMessage = '안녕하세요! 후하와 대화를 시작해 볼까요?';
@@ -93,11 +94,7 @@ class _CounselPageState extends State<CounselPage> {
 
   // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
-    // String currentTime =
-    //     DateFormat('HH:mm').format(DateTime.now()); // 현재 시간을 HH:mm 형식으로 가져옴
-    // String messageWithTime = '$message ($currentTime)'; // 메시지와 시간을 결합
     setState(() {
-      //_messages.add(messageWithTime);
       _messages.add(message);
       Timer(const Duration(milliseconds: 500), () {
         _scrollController.jumpTo(
@@ -140,7 +137,9 @@ class _CounselPageState extends State<CounselPage> {
         };
       }
     } catch (e) {
-      print('Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      // 에러가 발생했을 경우 파이어베이스에 로그 남기기
+      analytics.AnalyticsService.logErrorOccurred(
+          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
       return {
         'msgTxt': '오류가 발생했습니다.',
         'options': '',
@@ -148,11 +147,11 @@ class _CounselPageState extends State<CounselPage> {
     }
   }
 
-  /// Firestore에서 선택지 텍스트, 다음 메시지 번호 가져오기
+  /// Firestore에서 선택지 텍스트, 다음 메시지 이름 가져오기
   /// return nextMsg, optionTxt
-  Future<Map<String, String>> _getOptionMsgAndNextMsgNo(String msgNo) async {
+  Future<Map<String, String>> _getOptionMsgAndNextMsgNo(String msgName) async {
     String collectionName = 'options'; // 컬렉션 이름
-    String documentId = msgNo; // 문서 ID
+    String documentId = msgName; // 문서 ID
 
     try {
       // Firestore에서 문서 가져오기
@@ -177,7 +176,9 @@ class _CounselPageState extends State<CounselPage> {
         };
       }
     } catch (e) {
-      print('Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      // 에러가 발생했을 경우 파이어베이스에 로그 남기기
+      analytics.AnalyticsService.logErrorOccurred(
+          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
       return {
         'nextMsg': '오류가 발생했습니다.',
         'optionTxt': '',
@@ -215,40 +216,56 @@ class _CounselPageState extends State<CounselPage> {
   /// index: 사용자가 클릭한 버튼 인덱스
   void _showHoohaMsgAndUserOptions(int buttonIndex) async {
     print("Start of _showHoohaMsgAndUserOptions");
+    analytics.AnalyticsService.analytics.setAnalyticsCollectionEnabled(true);
+    // 직전 선택지에 딸려있었던 메시지들 확인하기
+    //print("_previousNextMessageNames=$_nextMessageNames");
 
-    // 사용자가 클릭한 선택지 인덱스 확인하기
-    print("_nextMessagesNums=$_nextMessagesNums");
+    // 직전에 클릭한 메시지 인덱스 확인하기
+    //print("clickedButtonIndex=$buttonIndex");
 
     // 사용자가 클릭한 선택지 텍스트를 버블로 띄워주기
-    String option = _options[buttonIndex];
-    _addMessage(option);
-    print("clickedButtonIndex=$buttonIndex");
+    String clickedButtonTxt = _options[buttonIndex];
+    _addMessage(clickedButtonTxt);
+    //print("clickedButtonTxt=$clickedButtonTxt");
 
-    // 사용자가 클릭한 선택지에 연결된 메시지 번호 가져오기
-    String nextMsgNo = _nextMessagesNums[buttonIndex];
+    // 사용자가 클릭한 선택지에 연결된 메시지 이름 가져오기
+    String nextMsgName = _nextMessageNames[buttonIndex];
+    //print("nextMsgName=$nextMsgName");
+    String previousNextMessageNamesString = _nextMessageNames.join(', ');
+    // 직전 선택지에서 현재 메시지로 오기까지에 대한 로깅
+    analytics.AnalyticsService.logChatbotMsgSentEvent(
+        previousNextMessageNamesString,
+        buttonIndex,
+        clickedButtonTxt,
+        nextMsgName);
 
     // 시나리오 혹은 프롬프트로 분기 나누기
 
     // 챗봇 메시지 가져오기 (1.시나리오 2.프롬프트)
-    Map<String, String> msgData = await _getChatbotMsg(nextMsgNo);
+    Map<String, String> msgData = await _getChatbotMsg(nextMsgName);
     String? msgTxt = msgData['msgTxt'];
 
     String? msgTxtHead = msgTxt?.substring(0, 6);
+
+    // 가져온 챗봇 메시지 시작부에 prompt 표시가 있는지 판단
     print("msgTxtHead=$msgTxtHead");
+
     String prompt = "prompt";
     if (msgTxtHead! == prompt) {
       // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-      _getAIResponse(option).then((aiResponse) {
+      _getAIResponse(clickedButtonTxt).then((aiResponse) {
         _addMessage(aiResponse);
-        print("aiResponse=$aiResponse");
+        //print("aiResponse=$aiResponse");
+        analytics.AnalyticsService.logGetAiResponseEvent(aiResponse);
       }).catchError((error) {
         _addMessage('Error: ${error.toString()}');
-        print("aiResponseError=${error.toString()}");
+        analytics.AnalyticsService.logErrorOccurred(
+            "aiResponseError=${error.toString()}");
       });
     } else {
       // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
       _addMessage(msgTxt!);
-      print("using nextMsgNo(=$nextMsgNo), msgTxt=$msgTxt");
+      //print("using nextMsgNo(=$nextMsgName), msgTxt=$msgTxt");
     }
 
     // 챗봇 메시지에 딸린 선택지 옵션들 담기
@@ -256,13 +273,13 @@ class _CounselPageState extends State<CounselPage> {
     List<String>? optionList = options?.split(' ');
     print("options=$options");
 
-    // 선택지 텍스트, 다음 메시지 번호 담을 준비
+    // 선택지 텍스트, 다음 메시지 이름 담을 준비
     List<String> optTxtList = [];
-    List<String> nextMsgNoList = [];
+    List<String> nextMsgNameList = [];
 
     // 선택지 반복문 돌리기
     for (var opt in optionList!) {
-      // 선택지 텍스트, 다음 메시지 번호 가져오기
+      // 선택지 텍스트, 다음 메시지 이름 가져오기
       Map<String, String> optMap = await _getOptionMsgAndNextMsgNo(opt);
       print("optMap=$optMap");
 
@@ -270,25 +287,30 @@ class _CounselPageState extends State<CounselPage> {
       String? txt = optMap['optionTxt'];
       optTxtList.add(txt!);
 
-      // 선택지와 연결된 다음 메시지 번호 담기
+      // 선택지와 연결된 다음 메시지 이름 담기
       String? nextMsgNo = optMap['nextMsg'];
-      nextMsgNoList.add(nextMsgNo!);
+      nextMsgNameList.add(nextMsgNo!);
     }
 
     // 선택지 버튼 텍스트 업데이트
-    setButtonOptions(optTxtList, nextMsgNoList);
+    setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
+
+    String nextMsgNamesString = nextMsgNameList.join(', ');
+    // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
+    analytics.AnalyticsService.logChatbotMsgPreparingEvent(
+        msgTxtHead, msgTxt!, options!, nextMsgNamesString);
   }
 
-  /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 번호 세팅
+  /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 이름들 세팅
   void setButtonOptions(List<String>? options, List<String>? nextMsgNums) {
     setState(() {
       /// 선택지 텍스트 세팅
       _options = options!;
 
-      /// 선택지에 연결된 다음 메시지 번호 세팅
-      _nextMessagesNums = nextMsgNums!;
-      print("_nextMessagesNums=$_nextMessagesNums");
+      /// 선택지에 연결된 다음 메시지 이름들 세팅
+      _nextMessageNames = nextMsgNums!;
+      print("_nextMessageNames=$_nextMessageNames");
     });
   }
 
@@ -363,7 +385,7 @@ class MessageBubbleListView extends StatelessWidget {
 
         // 현재 시간 가져오기
         String currentTime = DateFormat('h:mm a').format(DateTime.now());
-        print("currentTime=$currentTime\n DateTime.now()=$DateTime.now()");
+        // print("currentTime=$currentTime\n DateTime.now()=$DateTime.now()");
 
         return Column(
           children: [
