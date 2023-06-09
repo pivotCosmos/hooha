@@ -78,120 +78,123 @@ class _MyPageState extends State<MyPage> {
         automaticallyImplyLeading: false, // 뒤로가기 버튼 비활성화
         title: const Text('My Page'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '내정보',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400, width: 2.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '내정보',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: '이름'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '성별',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
+                    const SizedBox(height: 16.0),
+                    TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: '이름'),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '성별',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
-                      ),
-                      ToggleButtons(
-                        isSelected: [_isMaleSelected, _isFemaleSelected],
-                        onPressed: (int index) {
-                          setState(() {
-                            if (index == 0) {
-                              _isMaleSelected = !_isMaleSelected;
-                              _isFemaleSelected = false;
-                            } else if (index == 1) {
-                              _isMaleSelected = false;
-                              _isFemaleSelected = !_isFemaleSelected;
-                            }
-                          });
-                        },
-                        children: [
-                          Text('남성'),
-                          Text('여성'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: _quitDate ?? DateTime.now(),
-                        firstDate: DateTime(1950),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          _quitDate = pickedDate;
-                        });
-                      }
-                    },
-                    child: Text(
-                      _quitDate != null
-                          ? '금연 시작일: ${_quitDate!.toString().split(' ')[0]}'
-                          : '금연 시작 날짜',
+                        ToggleButtons(
+                          isSelected: [_isMaleSelected, _isFemaleSelected],
+                          onPressed: (int index) {
+                            setState(() {
+                              if (index == 0) {
+                                _isMaleSelected = !_isMaleSelected;
+                                _isFemaleSelected = false;
+                              } else if (index == 1) {
+                                _isMaleSelected = false;
+                                _isFemaleSelected = !_isFemaleSelected;
+                              }
+                            });
+                          },
+                          children: [
+                            Text('남성'),
+                            Text('여성'),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _saveUserInformation();
-                      _updateUserInformation();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('정보가 저장되었습니다.')),
-                      );
-                      // 토글 버튼 상태에 따라 선택된 성별 설정
-                    },
-                    child: const Text('저장'),
-                  ),
-                ],
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: _quitDate ?? DateTime.now(),
+                          firstDate: DateTime(1950),
+                          lastDate: DateTime.now(),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            _quitDate = pickedDate;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _quitDate != null
+                            ? '금연 시작일: ${_quitDate!.toString().split(' ')[0]}'
+                            : '금연 시작 날짜',
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _saveUserInformation();
+                        _updateUserInformation();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('정보가 저장되었습니다.')),
+                        );
+                        // 토글 버튼 상태에 따라 선택된 성별 설정
+                      },
+                      child: const Text('저장'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            ListTile(
-              tileColor: Colors.grey.shade50, // 타일의 배경색을 설정할 수 있습니다.
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0), // 테두리의 모서리를 둥글게 만듭니다.
-                side: BorderSide(
-                    color: Colors.grey.shade400,
-                    width: 2.0), // 테두리의 색상과 두께를 설정합니다.
+              const SizedBox(height: 16.0),
+              ListTile(
+                tileColor: Colors.grey.shade50, // 타일의 배경색을 설정할 수 있습니다.
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(8.0), // 테두리의 모서리를 둥글게 만듭니다.
+                  side: BorderSide(
+                      color: Colors.grey.shade400,
+                      width: 2.0), // 테두리의 색상과 두께를 설정합니다.
+                ),
+                leading: Icon(Icons.notifications), // 아이콘 추가
+                title: Text('알림 설정'),
+                trailing: Icon(Icons.chevron_right), // 맨 오른쪽에 화살표 아이콘 추가
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationSettingsPage()),
+                  );
+                },
               ),
-              leading: Icon(Icons.notifications), // 아이콘 추가
-              title: Text('알림 설정'),
-              trailing: Icon(Icons.chevron_right), // 맨 오른쪽에 화살표 아이콘 추가
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => NotificationSettingsPage()),
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

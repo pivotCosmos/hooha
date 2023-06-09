@@ -35,7 +35,8 @@ class _JournalPageState extends State<JournalPage> {
       setState(() {
         _journalList.add({
           'title': title,
-          'date': '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
+          'date':
+              '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
           'journal': journalText,
         });
         _titleController.clear();
@@ -47,6 +48,7 @@ class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('일지 작성'),
       ),

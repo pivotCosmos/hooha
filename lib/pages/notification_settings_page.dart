@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationSettingsPage extends StatefulWidget {
   NotificationSettingsPage({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class NotificationSettingsPage extends StatefulWidget {
 }
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
+  final String notificationTimeKey = 'notificationTime'; // SharedPreferences 키
   DateTime dateTime = DateTime.now();
   DateTime dateTime2 = DateTime.now();
   bool isNotificationEnabled = false; // 알림 활성화 여부
@@ -21,11 +23,37 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final TextEditingController _controller = TextEditingController();
+  late SharedPreferences prefs; // 추가: SharedPreferences 인스턴스
 
   @override
   void initState() {
     super.initState();
     initializeNotifications();
+    loadNotificationSettings(); // 저장된 알림 설정 값 및 시간 로드
+  }
+
+  // 추가: 저장된 알림 설정 값 및 시간 로드
+  Future<void> loadNotificationSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isNotificationEnabled = prefs.getBool('notificationEnabled') ?? false;
+      isNotificationEnabled2 = prefs.getBool('notificationEnabled2') ?? false;
+      // 저장된 시간 값을 가져옴
+      dateTime2 = DateTime.parse(
+          prefs.getString(notificationTimeKey) ?? DateTime.now().toString());
+      dateTime = DateTime.parse(
+          prefs.getString('dateTime') ?? DateTime.now().toString());
+    });
+  }
+
+  // 추가: 알림 설정 값 및 시간 저장
+  Future<void> saveNotificationSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setBool('notificationEnabled', isNotificationEnabled);
+    prefs.setBool('notificationEnabled2', isNotificationEnabled2);
+    // dateTime2 값을 저장
+    prefs.setString(notificationTimeKey, dateTime2.toString());
+    prefs.setString('dateTime', dateTime.toString());
   }
 
   void toggleNotification(bool value) {
@@ -36,6 +64,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       } else {
         cancelNotification();
       }
+      saveNotificationSettings(); // 추가: 알림 설정 값 저장
     });
   }
 
@@ -47,6 +76,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       } else {
         cancelNotification();
       }
+      saveNotificationSettings(); // 추가: 알림 설정 값 저장
     });
   }
 
@@ -92,12 +122,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         tz.TZDateTime.from(dateTime2, tz.local); // 사용자가 설정한 시간을 가져온다.
 
     // 다음 날의 동일한 시간으로 설정
-    var nextDay = scheduledDate.add(const Duration(minutes: 1));
+    var nextDay = scheduledDate.add(const Duration(minutes: 0));
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       '로컬 푸시 알림',
-      '설정한 시간입니다!',
+      '출석체크 설정한 시간입니다!',
       nextDay,
       platformChannelSpecifics,
       //androidAllowWhileIdle: true,
@@ -238,7 +268,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             backgroundColor: Colors.white,
                             initialDateTime: dateTime2,
                             onDateTimeChanged: (DateTime newTime) {
-                              setState(() => dateTime2 = newTime);
+                              setState(() {
+                                dateTime2 = newTime;
+                                scheduleNotification(); // 새로운 시간으로 알림 예약
+                              });
                             },
                             use24hFormat: true,
                             mode: CupertinoDatePickerMode.time,

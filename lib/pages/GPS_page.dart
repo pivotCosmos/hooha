@@ -84,7 +84,7 @@ class _MapSampleState extends State<MapSample> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: _destination ?? LatLng(37.317439546276, 127.12702648557),
-          zoom: 20.0,
+          zoom: 14.0,
         ),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
