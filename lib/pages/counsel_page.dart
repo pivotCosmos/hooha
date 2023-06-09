@@ -335,17 +335,6 @@ class _CounselPageState extends State<CounselPage> {
             ),
           ),
           Container(
-            alignment: Alignment.center,
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              color: Colors.grey[300],
-              child: Text(
-                '버튼이 너무 길 경우 스와이프 해주세요',
-                style: TextStyle(fontSize: 14.0),
-              ),
-            ),
-          ),
-          Container(
             padding: const EdgeInsets.all(8.0),
             child: createOptionButtons(context),
           ),
@@ -355,55 +344,23 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 사용자에게 제공할 선택지 버튼 생성
-  Widget createOptionButtons(BuildContext context) {
+  /// 버튼 너비가 길거나 여러 개일 경우 층층이 생성
+  Widget createOptionButtons(context) {
     final isChatbotMessage = _messages.length % 2 == 0;
-    double screenWidth = MediaQuery.of(context).size.width;
-    bool shouldScroll = false;
-    //너무 버튼이 길거나 버튼 갯수가 3개 이상일 때는 스와이프
-    for (String buttonText in _options) {
-      double textWidth = buttonText.length * 16.0; // 가상의 텍스트 너비 계산
-      if (textWidth > screenWidth / 2 || _options.length >= 3) {
-        shouldScroll = true;
-        break;
-      }
-    }
-
-    if (shouldScroll) {
-      return SizedBox(
-        height: 40,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            for (int i = 0; i < _options.length; i++)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: ElevatedButton(
-                  onPressed: isChatbotMessage
-                      ? null
-                      : () => _showHoohaMsgAndUserOptions(i),
-                  child: Text(_options[i]),
-                ),
-              ),
-          ],
-        ),
-      );
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (int i = 0; i < _options.length; i++)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: ElevatedButton(
-                onPressed: isChatbotMessage
-                    ? null
-                    : () => _showHoohaMsgAndUserOptions(i),
-                child: Text(_options[i]),
-              ),
-            ),
-        ],
-      );
-    }
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8.0,
+      children: [
+        for (int i = 0; i < _options.length; i++)
+          ElevatedButton(
+            // 챗봇 응답 기다리는 동안 선택지 버튼 비활성화
+            onPressed: isChatbotMessage
+                ? null
+                : () => _showHoohaMsgAndUserOptions(i), // 버튼 인덱스 전달
+            child: Text(_options[i]),
+          ),
+      ],
+    );
   }
 }
 
