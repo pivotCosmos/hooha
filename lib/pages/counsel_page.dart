@@ -97,10 +97,6 @@ class _CounselPageState extends State<CounselPage> {
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
-      Timer(const Duration(milliseconds: 500), () {
-        _scrollController.jumpTo(
-            _scrollController.position.maxScrollExtent); // Scroll to the bottom
-      });
     });
   }
 
@@ -189,6 +185,45 @@ class _CounselPageState extends State<CounselPage> {
     }
   }
 
+  /// Firestore에서 사용자 정보 가져오기
+  /// return name, job
+  Future<Map<String, String>> _getUserInfo(String userId) async {
+    String collectionName = 'users'; // 컬렉션 이름
+    String documentId = userId; // 문서 ID
+
+    try {
+      // Firestore에서 문서 가져오기
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(documentId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        // 문서가 존재할 경우 필드 값 가져오기
+        String name = documentSnapshot.get('name');
+        String job = documentSnapshot.get('job');
+
+        return {
+          'name': name,
+          'job': job,
+        }; // 가져온 값 반환
+      } else {
+        return {
+          'msgTxt': '문서가 존재하지 않습니다.',
+          'options': '',
+        };
+      }
+    } catch (e) {
+      // 에러가 발생했을 경우 파이어베이스에 로그 남기기
+      analytics.AnalyticsService.logErrorOccurred(
+          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      return {
+        'msgTxt': '오류가 발생했습니다.',
+        'options': '',
+      };
+    }
+  }
+
   /// OpenAI API에서 답변 가져오기
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
@@ -251,15 +286,28 @@ class _CounselPageState extends State<CounselPage> {
     Map<String, String> msgData = await _getChatbotMsg(nextMsgName);
     String? msgTxt = msgData['msgTxt'];
 
-    String? msgTxtHead = msgTxt?.substring(0, 6);
-
     // 가져온 챗봇 메시지 시작부에 prompt 표시가 있는지 판단
+    String? msgTxtHead = msgTxt?.substring(0, 6);
     print("msgTxtHead=$msgTxtHead");
 
     String prompt = "prompt";
     if (msgTxtHead! == prompt) {
       // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-      _getAIResponse(clickedButtonTxt).then((aiResponse) {
+
+      // "prompt" 표시 부분을 잘라내고 프롬프트 담기
+      msgTxt = msgTxt?.substring(6);
+
+      // 회원 아이디로 회원정보 가져오기
+      // 필요한 회원정보: 회원 유형, 회원 아이디
+      Map<String, String> userData = await _getUserInfo('userId입력');
+      String? name = userData['name'];
+      String? job = userData['job'];
+
+      // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
+      String completePrompt = "$job인 $name님" + msgTxt!;
+      print("completePrompt=$completePrompt");
+
+      _getAIResponse(completePrompt).then((aiResponse) {
         _addMessage(aiResponse);
         //print("aiResponse=$aiResponse");
         analytics.AnalyticsService.logGetAiResponseEvent(aiResponse);
@@ -301,6 +349,15 @@ class _CounselPageState extends State<CounselPage> {
     // 선택지 버튼 텍스트 업데이트
     setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
+
+    // 선택지 버튼 갱신 후에 스크롤 내리기
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
 
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
