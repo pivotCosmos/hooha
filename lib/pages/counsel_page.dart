@@ -96,10 +96,6 @@ class _CounselPageState extends State<CounselPage> {
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
-      Timer(const Duration(milliseconds: 500), () {
-        _scrollController.jumpTo(
-            _scrollController.position.maxScrollExtent); // Scroll to the bottom
-      });
     });
   }
 
@@ -245,15 +241,25 @@ class _CounselPageState extends State<CounselPage> {
     Map<String, String> msgData = await _getChatbotMsg(nextMsgName);
     String? msgTxt = msgData['msgTxt'];
 
-    String? msgTxtHead = msgTxt?.substring(0, 6);
-
     // 가져온 챗봇 메시지 시작부에 prompt 표시가 있는지 판단
+    String? msgTxtHead = msgTxt?.substring(0, 6);
     print("msgTxtHead=$msgTxtHead");
 
     String prompt = "prompt";
     if (msgTxtHead! == prompt) {
       // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
-      _getAIResponse(clickedButtonTxt).then((aiResponse) {
+
+      // "prompt" 표시 부분을 잘라내고 프롬프트 담기
+      msgTxt = msgTxt?.substring(6);
+
+      // 회원 아이디로 회원정보 가져오기
+      // 필요한 회원정보: 회원 유형, 회원 아이디
+
+      // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
+      String completePrompt = "(사용자유형)인 (이름)님" + msgTxt!;
+      print("completePrompt=$completePrompt");
+
+      _getAIResponse(completePrompt).then((aiResponse) {
         _addMessage(aiResponse);
         //print("aiResponse=$aiResponse");
         analytics.AnalyticsService.logGetAiResponseEvent(aiResponse);
@@ -295,6 +301,15 @@ class _CounselPageState extends State<CounselPage> {
     // 선택지 버튼 텍스트 업데이트
     setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
+
+    // 선택지 버튼 갱신 후에 스크롤 내리기
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
 
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
@@ -339,10 +354,12 @@ class _CounselPageState extends State<CounselPage> {
   }
 
   /// 사용자에게 제공할 선택지 버튼 생성
+  /// 버튼 너비가 길거나 여러 개일 경우 층층이 생성
   Widget createOptionButtons(context) {
     final isChatbotMessage = _messages.length % 2 == 0;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8.0,
       children: [
         for (int i = 0; i < _options.length; i++)
           ElevatedButton(
