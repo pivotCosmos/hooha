@@ -182,6 +182,45 @@ class _CounselPageState extends State<CounselPage> {
     }
   }
 
+  /// Firestore에서 사용자 정보 가져오기
+  /// return name, job
+  Future<Map<String, String>> _getUserInfo(String userId) async {
+    String collectionName = 'users'; // 컬렉션 이름
+    String documentId = userId; // 문서 ID
+
+    try {
+      // Firestore에서 문서 가져오기
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .doc(documentId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        // 문서가 존재할 경우 필드 값 가져오기
+        String name = documentSnapshot.get('name');
+        String job = documentSnapshot.get('job');
+
+        return {
+          'name': name,
+          'job': job,
+        }; // 가져온 값 반환
+      } else {
+        return {
+          'msgTxt': '문서가 존재하지 않습니다.',
+          'options': '',
+        };
+      }
+    } catch (e) {
+      // 에러가 발생했을 경우 파이어베이스에 로그 남기기
+      analytics.AnalyticsService.logErrorOccurred(
+          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      return {
+        'msgTxt': '오류가 발생했습니다.',
+        'options': '',
+      };
+    }
+  }
+
   /// OpenAI API에서 답변 가져오기
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
@@ -254,9 +293,12 @@ class _CounselPageState extends State<CounselPage> {
 
       // 회원 아이디로 회원정보 가져오기
       // 필요한 회원정보: 회원 유형, 회원 아이디
+      Map<String, String> userData = await _getUserInfo('userId입력');
+      String? name = userData['name'];
+      String? job = userData['job'];
 
       // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
-      String completePrompt = "(사용자유형)인 (이름)님" + msgTxt!;
+      String completePrompt = "$job인 $name님" + msgTxt!;
       print("completePrompt=$completePrompt");
 
       _getAIResponse(completePrompt).then((aiResponse) {
