@@ -14,6 +14,7 @@ class NotificationSettingsPage extends StatefulWidget {
 }
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
+  final String notificationTimeKey = 'notificationTime'; // SharedPreferences 키
   DateTime dateTime = DateTime.now();
   DateTime dateTime2 = DateTime.now();
   bool isNotificationEnabled = false; // 알림 활성화 여부
@@ -28,23 +29,31 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   void initState() {
     super.initState();
     initializeNotifications();
-    loadNotificationSettings(); // 추가: 저장된 알림 설정 값 로드
+    loadNotificationSettings(); // 저장된 알림 설정 값 및 시간 로드
   }
 
-  // 추가: 저장된 알림 설정 값 로드
+  // 추가: 저장된 알림 설정 값 및 시간 로드
   Future<void> loadNotificationSettings() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
       isNotificationEnabled = prefs.getBool('notificationEnabled') ?? false;
       isNotificationEnabled2 = prefs.getBool('notificationEnabled2') ?? false;
+      // 저장된 시간 값을 가져옴
+      dateTime2 = DateTime.parse(
+          prefs.getString(notificationTimeKey) ?? DateTime.now().toString());
+      dateTime = DateTime.parse(
+          prefs.getString('dateTime') ?? DateTime.now().toString());
     });
   }
 
-  // 추가: 알림 설정 값 저장
+  // 추가: 알림 설정 값 및 시간 저장
   Future<void> saveNotificationSettings() async {
     prefs = await SharedPreferences.getInstance();
     prefs.setBool('notificationEnabled', isNotificationEnabled);
     prefs.setBool('notificationEnabled2', isNotificationEnabled2);
+    // dateTime2 값을 저장
+    prefs.setString(notificationTimeKey, dateTime2.toString());
+    prefs.setString('dateTime', dateTime.toString());
   }
 
   void toggleNotification(bool value) {
@@ -259,7 +268,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             backgroundColor: Colors.white,
                             initialDateTime: dateTime2,
                             onDateTimeChanged: (DateTime newTime) {
-                              setState(() => dateTime2 = newTime);
+                              setState(() {
+                                dateTime2 = newTime;
+                                scheduleNotification(); // 새로운 시간으로 알림 예약
+                              });
                             },
                             use24hFormat: true,
                             mode: CupertinoDatePickerMode.time,
