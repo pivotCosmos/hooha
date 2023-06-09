@@ -21,16 +21,13 @@ String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
 // ignore: constant_identifier_names
 const String MODEL_ID = 'gpt-3.5-turbo';
 
-/// Cloud Firestore init
-FirebaseFirestore db = FirebaseFirestore.instance;
-
 void main() async {
   await dotenv.load(fileName: 'assets/images/.env');
   //임의로 로그인 관련 기능 전부 주석처리함 로그인기능하려면 주석 풀고
   //밑에 @override 아래 위젯부분 지우면 됨
 
   WidgetsFlutterBinding.ensureInitialized();
-  kakao.KakaoSdk.init(nativeAppKey: 'f4797bdadfc6cd9c0ec4bfd879d8337b');
+  kakao.KakaoSdk.init(nativeAppKey: dotenv.env['NATIVE_APP_KEY']);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform); // Firebase 초기화
