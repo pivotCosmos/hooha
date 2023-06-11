@@ -24,6 +24,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       FlutterLocalNotificationsPlugin();
   final TextEditingController _controller = TextEditingController();
   late SharedPreferences prefs; // 추가: SharedPreferences 인스턴스
+  List<String> notificationHistory = [];
 
   @override
   void initState() {
@@ -396,9 +397,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     width: 135,
                     child: ElevatedButton(
                         onPressed: showNotification_30M,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
                         child: const Text(
                           "30분",
-                          style: TextStyle(color: Colors.black),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -406,9 +420,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     width: 135,
                     child: ElevatedButton(
                         onPressed: showNotification_1H,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
                         child: const Text(
                           "1시간",
-                          style: TextStyle(color: Colors.black),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
                         )),
                   ),
                 ],
@@ -420,9 +447,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     width: 135,
                     child: ElevatedButton(
                         onPressed: showNotification_90M,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
                         child: const Text(
                           "1시간 30분",
-                          style: TextStyle(color: Colors.black),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -430,9 +470,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     width: 135,
                     child: ElevatedButton(
                         onPressed: showNotification_2H,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
                         child: const Text(
                           "2시간",
-                          style: TextStyle(color: Colors.black),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
                         )),
                   ),
                 ],
