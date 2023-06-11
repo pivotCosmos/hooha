@@ -229,7 +229,7 @@ class _CounselPageState extends State<CounselPage> {
       headers: {
         'Authorization': 'Bearer $OPENAI_API_KEY',
         'Content-Type': 'application/json',
-        "model": "text-davinci-003"
+        "model": "davinci"
       },
       body: jsonEncode({
         'prompt': message,
@@ -238,9 +238,21 @@ class _CounselPageState extends State<CounselPage> {
       }),
     );
 
+    // AI 답변 맨앞 불필요한 공백 제거
+    String trimAIResponse(String text) {
+      if (text.startsWith('\n')) {
+        return text.trimLeft();
+      } else {
+        return text;
+      }
+    }
+
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-      return data['choices'][0]['text'].toString();
+      String responseText = data['choices'][0]['text'].toString();
+      String cleanedResponseText = trimAIResponse(responseText);
+      print("cleanedResponseText=$cleanedResponseText");
+      return cleanedResponseText;
     } else {
       throw Exception('Failed to generate text');
     }
@@ -345,7 +357,7 @@ class _CounselPageState extends State<CounselPage> {
     print("End of _showHoohaMsgAndUserOptions");
 
     // 선택지 버튼 갱신 후에 스크롤 내리기
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 200),
@@ -356,7 +368,7 @@ class _CounselPageState extends State<CounselPage> {
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
     analytics.AnalyticsService.logChatbotMsgPreparingEvent(
-        msgTxtHead, msgTxt!, options!, nextMsgNamesString);
+        msgTxtHead, msgTxt, options!, nextMsgNamesString);
   }
 
   /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 이름들 세팅
