@@ -281,10 +281,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 children: [
                   const SizedBox(width: 20), // 여백 추가
                   const SizedBox(child: Text('금연여부 체크 알림')),
-                  const SizedBox(width: 45), // 여백 추가
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
+                  const SizedBox(width: 20), // 여백 추가
+                  Flexible(
+                    child: OutlinedButton(
+                      onPressed: () {
                         showCupertinoModalPopup(
                           context: context,
                           builder: (BuildContext context) => SizedBox(
@@ -312,7 +312,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  //SizedBox(width: 16),
                   SizedBox(
                     height: 36,
                     width: 100,
@@ -334,10 +334,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 children: [
                   const SizedBox(width: 20), // 여백 추가
                   const SizedBox(child: Text('격려 알림 시작')),
-                  const SizedBox(width: 60), // 여백 추가
+                  const SizedBox(width: 44), // 여백 추가
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
+                    child: OutlinedButton(
+                      onPressed: () {
                         showCupertinoModalPopup(
                           context: context,
                           builder: (BuildContext context) => SizedBox(
@@ -362,7 +362,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  //SizedBox(width: 16),
                   SizedBox(
                     height: 36,
                     width: 100,
