@@ -7,10 +7,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bubble/bubble.dart';
 import 'package:intl/intl.dart';
 import 'package:hooha/services/firebase_analytics.dart' as analytics;
+import 'package:loading_indicator/loading_indicator.dart';
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
 const String MODEL_ID = 'text-davinci-003';
+
+/// Loading Indicator colors
+const List<Color> indicatorColors = const [
+  Colors.red,
+  Colors.orange,
+  Colors.yellow,
+  Colors.green,
+  Colors.blue,
+  Colors.indigo,
+  Colors.purple,
+];
 
 ///Counsel Module
 class GetCounsel extends StatelessWidget {
@@ -150,8 +162,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'msgTxt': '오류가 발생했습니다.',
         'options': '',
@@ -189,8 +200,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'nextMsg': '오류가 발생했습니다.',
         'optionTxt': '',
@@ -228,8 +238,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'msgTxt': '오류가 발생했습니다.',
         'options': '',
@@ -453,7 +462,13 @@ class _CounselPageState extends State<CounselPage> {
             Container(
               color: Colors.black54,
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: Padding(
+                  padding: EdgeInsets.all(50),
+                  child: LoadingIndicator(
+                    colors: indicatorColors,
+                    indicatorType: Indicator.pacman,
+                  ),
+                ),
               ),
             ),
         ],
