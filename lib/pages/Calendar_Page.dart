@@ -1,9 +1,8 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, duplicate_ignore
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 
@@ -21,62 +20,127 @@ class _CalendarPageState extends State<CalendarPage> {
   int _consecutiveDays = 0;
   bool _isAttendanceCompleted = false;
   DateTime _currentDate = DateTime.now();
+  late DocumentReference _userDocRef;
+  bool _isDisposed = false;
 
   final EventList<Event> _markedDateMap = EventList<Event>(events: {});
 
   @override
   void initState() {
     super.initState();
+    _initializeFirestore();
     _loadAttendanceCount();
   }
 
+  Future<void> _initializeFirestore() async {
+    final kakao.User user = await kakao.UserApi.instance.me();
+    _userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+  }
+
   Future<void> _loadAttendanceCount() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    setState(() {
-      _attendanceCount = sharedPreferences.getInt('attendanceCount') ?? 0;
-      _consecutiveDays = sharedPreferences.getInt('consecutiveDays') ?? 0;
-      _isAttendanceCompleted =
-          sharedPreferences.getBool('isAttendanceCompleted') ?? false;
-    });
+    final kakao.User user = await kakao.UserApi.instance.me();
+    _userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+    final userDoc = await _userDocRef.get();
+    final userData = userDoc.data() as Map<String, dynamic>?;
+    if (!_isDisposed) {
+      if (userData != null) {
+        setState(() {
+          _attendanceCount = userData['attendanceCount'] ?? 0;
+          _consecutiveDays = userData['consecutiveDays'] ?? 0;
+          _isAttendanceCompleted = userData['isAttendanceCompleted'] ?? false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMarkedDates() async {
+    final attendanceSnapshot = await _userDocRef.collection('attendance').get();
+    for (final doc in attendanceSnapshot.docs) {
+      final attendanceDate = DateTime.parse(doc.id);
+      _markedDateMap.add(
+        attendanceDate,
+        Event(
+          date: attendanceDate,
+          dot: Container(
+            decoration: const BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _checkAttendance() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
     final now = DateTime.now();
 
-    final lastAttendanceDateStr =
-        sharedPreferences.getString('lastAttendanceDate');
-    if (lastAttendanceDateStr != null) {
-      final lastAttendanceDate = DateTime.parse(lastAttendanceDateStr);
-      final difference = now.difference(lastAttendanceDate).inDays;
-      if (difference < 1) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('알림'),
-            content: const Text('이미 오늘 출석체크를 하였습니다.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('확인'),
-              ),
-            ],
-          ),
-        );
-        return;
+    final userData = await _userDocRef.get();
+    if (userData.exists) {
+      final data = userData.data() as Map<String, dynamic>;
+      final lastAttendanceDateStr = data['lastAttendanceDate'];
+      if (lastAttendanceDateStr != null) {
+        final lastAttendanceDate = DateTime.parse(lastAttendanceDateStr);
+        final difference = now.difference(lastAttendanceDate).inDays;
+        if (difference < 1) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text('알림'),
+              content: const Text('이미 오늘 출석체크를 하였습니다.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('확인'),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+        if (difference == 1) {
+          // 출석이 이어진 경우
+          setState(() {
+            _consecutiveDays++;
+          });
+        } else {
+          // 출석이 중간에 빠진 경우
+          setState(() {
+            _consecutiveDays = 1;
+          });
+        }
+      } else {
+        // 첫 출석일 경우
+        setState(() {
+          _consecutiveDays = 1;
+        });
       }
     }
 
     // 출석 체크
     setState(() {
       _attendanceCount++;
-      _consecutiveDays++;
       _isAttendanceCompleted = true;
     });
-    // 오늘 출석체크한 날짜를 저장
-    sharedPreferences.setString('lastAttendanceDate', now.toString());
+
+    // Firestore에 출석체크 정보 업데이트
+    await _userDocRef.set({
+      'attendanceCount': _attendanceCount,
+      'consecutiveDays': _consecutiveDays,
+      'isAttendanceCompleted': _isAttendanceCompleted,
+      'lastAttendanceDate': now.toIso8601String(),
+    }, SetOptions(merge: true));
+
+    // 출석체크한 날짜를 Firestore에 저장
+    await _userDocRef
+        .collection('attendance')
+        .doc(now.toIso8601String())
+        .set({});
+
     // 출석체크한 날짜를 _markedDateMap에 추가
     _markedDateMap.add(
       now,
@@ -90,12 +154,6 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
       ),
     );
-
-    // 출석체크 관련 정보 저장
-    sharedPreferences.setInt('attendanceCount', _attendanceCount);
-    sharedPreferences.setInt('consecutiveDays', _consecutiveDays);
-    sharedPreferences.setBool('isAttendanceCompleted', _isAttendanceCompleted);
-    sharedPreferences.setString('lastAttendanceDate', now.toString());
 
     // 알림 표시
     showDialog(
@@ -119,7 +177,8 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _resetAttendance() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+
     setState(() {
       _attendanceCount = 0;
       _consecutiveDays = 0;
@@ -127,10 +186,19 @@ class _CalendarPageState extends State<CalendarPage> {
       _markedDateMap.clear();
     });
 
-    sharedPreferences.remove('attendanceCount');
-    sharedPreferences.remove('consecutiveDays');
-    sharedPreferences.remove('isAttendanceCompleted');
-    sharedPreferences.remove('lastAttendanceDate');
+    // 출석 관련 정보 초기화
+    await _userDocRef.set({
+      'attendanceCount': 0,
+      'consecutiveDays': 0,
+      'isAttendanceCompleted': false,
+      'lastAttendanceDate': null,
+    }, SetOptions(merge: true));
+
+    // 출석 기록 삭제
+    final attendanceSnapshot = await _userDocRef.collection('attendance').get();
+    for (final doc in attendanceSnapshot.docs) {
+      await doc.reference.delete();
+    }
 
     // ignore: use_build_context_synchronously
     showDialog(

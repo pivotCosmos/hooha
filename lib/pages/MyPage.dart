@@ -10,6 +10,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'notification_settings_page.dart';
 
+enum Gender { male, female }
+
 class MyPage extends StatefulWidget {
   const MyPage({Key? key}) : super(key: key);
 
@@ -22,7 +24,10 @@ class _MyPageState extends State<MyPage> {
   DateTime? _quitDate;
   String? _selectedJob;
   String? _selectedGender;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var _attendanceCount;
+  var _consecutiveDays;
+  var _isAttendanceCompleted;
+  var _lastAttendanceDate;
 
   DateTime dateTime = DateTime.now(); // 사용자가 선택한 시간을 저장
   bool isNotificationEnabled = false; // 알림 활성화 여부
@@ -64,22 +69,44 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
-  Future<String?> getUserId() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString('userId');
-  }
-
   Future<void> _saveUserInformation() async {
-    final userId = await getUserId();
-    if (userId != null) {
-      final userDocRef =
-          FirebaseFirestore.instance.collection('users').doc(userId);
-      await userDocRef.set({
-        'displayName': _nameController.text,
-        'gender': _selectedGender,
+    final kakao.User user = await kakao.UserApi.instance.me();
+    if (user.id != null) {
+      final userDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.id.toString());
+
+      await userDocRef.update({
+        'displayName': user.kakaoAccount?.profile?.nickname,
+        'email': user.kakaoAccount?.email,
+        'name': _nameController.text,
+        'gender': _selectedGender == Gender.male ? 'male' : 'female',
         'quitDate':
             _quitDate != null ? _quitDate!.millisecondsSinceEpoch : null,
         'job': _selectedJob,
+      });
+
+      if (_attendanceCount != null) {
+        await userDocRef.update({'attendanceCount': _attendanceCount});
+      }
+
+      if (_consecutiveDays != null) {
+        await userDocRef.update({'consecutiveDays': _consecutiveDays});
+      }
+
+      if (_isAttendanceCompleted != null) {
+        await userDocRef
+            .update({'isAttendanceCompleted': _isAttendanceCompleted});
+      }
+
+      if (_lastAttendanceDate != null) {
+        await userDocRef.update({
+          'lastAttendanceDate': _lastAttendanceDate!.toIso8601String(),
+        });
+      }
+
+      setState(() {
+        _loadUserInformation();
       });
     }
   }
@@ -285,6 +312,91 @@ class _MyPageState extends State<MyPage> {
                         ],
                       ),
                       const SizedBox(height: 16.0),
+                      Text(
+                        '직업',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              String? selectedJob = _selectedJob;
+                              return AlertDialog(
+                                title: Text('직업 선택'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    RadioListTile<String>(
+                                      title: const Text('직장인'),
+                                      value: '직장인',
+                                      groupValue: selectedJob,
+                                      onChanged: (String? value) {
+                                        selectedJob = value;
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: const Text('학생'),
+                                      value: '학생',
+                                      groupValue: selectedJob,
+                                      onChanged: (String? value) {
+                                        selectedJob = value;
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: const Text('주부'),
+                                      value: '주부',
+                                      groupValue: selectedJob,
+                                      onChanged: (String? value) {
+                                        selectedJob = value;
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: const Text('군인'),
+                                      value: '군인',
+                                      groupValue: selectedJob,
+                                      onChanged: (String? value) {
+                                        selectedJob = value;
+                                      },
+                                    ),
+                                    RadioListTile<String>(
+                                      title: const Text('무직'),
+                                      value: '무직',
+                                      groupValue: selectedJob,
+                                      onChanged: (String? value) {
+                                        selectedJob = value;
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _selectedJob = selectedJob!;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text('확인'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Text(
+                            _selectedJob != null ? _selectedJob! : '직업 선택'),
+                      ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: OutlinedButton(
@@ -329,158 +441,3 @@ class _MyPageState extends State<MyPage> {
     );
   }
 }
-
-/*class NotificationSettingsPage extends StatelessWidget {
-  const NotificationSettingsPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('알림 설정'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-<<<<<<< HEAD
-            Text(
-              '알림 설정',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-=======
-            Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '내정보',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: '이름'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '성별',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      ToggleButtons(
-                        isSelected: [_isMaleSelected, _isFemaleSelected],
-                        onPressed: (int index) {
-                          setState(() {
-                            if (index == 0) {
-                              _isMaleSelected = !_isMaleSelected;
-                              _isFemaleSelected = false;
-                            } else if (index == 1) {
-                              _isMaleSelected = false;
-                              _isFemaleSelected = !_isFemaleSelected;
-                            }
-                          });
-                        },
-                        children: [
-                          Text('남성'),
-                          Text('여성'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '금연 시작일',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: () async {
-                          final DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: _quitDate ?? DateTime.now(),
-                            firstDate: DateTime(1950),
-                            lastDate: DateTime.now(),
-                          );
-                          if (pickedDate != null) {
-                            setState(() {
-                              _quitDate = pickedDate;
-                            });
-                          }
-                        },
-                        style: ButtonStyle(
-                          alignment: Alignment
-                              .centerLeft, // Align button content to the left
-                        ),
-                        child: Text(
-                          _quitDate != null
-                              ? '${_quitDate!.toString().split(' ')[0]}'
-                              : '금연 시작 날짜',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        await _saveUserInformation();
-                        _updateUserInformation();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('정보가 저장되었습니다.')),
-                        );
-                        // 토글 버튼 상태에 따라 선택된 성별 설정
-                      },
-                      child: const Text('저장'),
-                    ),
-                  ),
-                ],
->>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '매일 알림 받기',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                Switch(
-                  value: true,
-                  onChanged: (value) {
-                    // 알림 활성화 여부 변경
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}*/

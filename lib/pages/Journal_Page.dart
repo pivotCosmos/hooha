@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({Key? key}) : super(key: key);
@@ -12,6 +14,44 @@ class _JournalPageState extends State<JournalPage> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _journalController = TextEditingController();
   List<Map<String, String>> _journalList = [];
+  late DocumentReference _userDocRef;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJournalList();
+  }
+
+  Future<void> _initializeFirestore() async {
+    final kakao.User user = await kakao.UserApi.instance.me();
+    _userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+  }
+
+  Future<void> _fetchJournalList() async {
+    await _initializeFirestore(); // Firestore 초기화
+    final snapshot = await _userDocRef.collection('diary').get();
+    final List<Map<String, String>> journalList = [];
+
+    snapshot.docs.forEach((doc) {
+      final data = doc.data();
+      final title = data['제목'] as String?;
+      final date = data['날짜'] as String?;
+      final journal = data['내용'] as String?;
+
+      if (title != null && date != null && journal != null) {
+        journalList.add({
+          'title': title,
+          'date': date,
+          'journal': journal,
+        });
+      }
+    });
+
+    setState(() {
+      _journalList = journalList;
+    });
+  }
 
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -28,15 +68,25 @@ class _JournalPageState extends State<JournalPage> {
     }
   }
 
-  void _saveJournal() {
+  void _saveJournal() async {
     String title = _titleController.text.trim();
     String journalText = _journalController.text.trim();
+
     if (title.isNotEmpty && journalText.isNotEmpty) {
+      final journalDate =
+          '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
+
+      // Firestore에 일지 내용 저장
+      await _userDocRef.collection('diary').doc(journalDate).set({
+        '제목': title,
+        '날짜': journalDate,
+        '내용': journalText,
+      });
+
       setState(() {
         _journalList.add({
           'title': title,
-          'date':
-              '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
+          'date': journalDate,
           'journal': journalText,
         });
         _titleController.clear();

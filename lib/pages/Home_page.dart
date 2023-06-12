@@ -13,13 +13,11 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String _name = '';
-  String _gender = '';
+  int? _checkdays = 0;
   DateTime? _quitDate;
   int _quitDays = 0;
-  int _attendanceCount = 0;
-  int _consecutiveDays = 0;
+  final int _consecutiveDays = 0;
   int _money = 0;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -41,7 +39,7 @@ class _MainPageState extends State<MainPage> {
       if (userData != null) {
         setState(() {
           _name = userData['name'] ?? '';
-          _gender = userData['gender'] ?? '';
+          _checkdays = userData['attendanceCount'] as int?; // 수정된 부분
           final quitDateTimestamp = userData['quitDate'];
           final int quitDateTimestampInt =
               quitDateTimestamp != null ? quitDateTimestamp : 0;
@@ -74,12 +72,18 @@ class _MainPageState extends State<MainPage> {
 
   // 정보 다시입력 창
   Future<void> _resetUserInformation() async {
-    final user = _firestore.collection('users').doc('your_user_id');
-    await user.update({
-      'name': FieldValue.delete(),
+    final kakao.User user = await kakao.UserApi.instance.me();
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+
+    final dataToUpdate = {
+      'displayName': FieldValue.delete(),
       'gender': FieldValue.delete(),
       'quitDate': FieldValue.delete(),
-    });
+      'job': FieldValue.delete(),
+    };
+
+    await userDocRef.update(dataToUpdate);
     await _loadUserInformation();
   }
 
@@ -95,44 +99,57 @@ class _MainPageState extends State<MainPage> {
     }
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$_name 님! 오늘도 방문해 주셨군요!',
-              style: const TextStyle(fontSize: 18.0),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Center(
+          child: Text(
+            '메인화면',
+            style: TextStyle(
+              color: Colors.black,
             ),
-            Text(
-              '금연 시작일: ${_quitDate != null ? _quitDate.toString().split(' ')[0] : 'Not set'}',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              '금연 $_quitDays일 째',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              '연속 $_consecutiveDays일 동안 출석 중입니다.',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              '$_money원 절약 중이에요.',
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            /*ElevatedButton(
-              onPressed: _resetUserInformation,
-              child: const Text('정보 다시입력'),
-            ),*/
-            const SizedBox(height: 20),
-            Center(
-              child: Image.asset(
-                imagePath,
-                width: 250,
-                height: 250,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$_name 님! 오늘도 방문해 주셨군요!',
+                style: const TextStyle(fontSize: 18.0),
               ),
-            ),
-          ],
+              Text(
+                '금연 시작일: ${_quitDate != null ? _quitDate.toString().split(' ')[0] : 'Not set'}',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                '금연 $_quitDays 일 째',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                '$_checkdays 일 동안 출석 중입니다.',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                '$_money원 절약 중이에요.',
+                style: const TextStyle(fontSize: 18.0),
+              ),
+              ElevatedButton(
+                onPressed: _resetUserInformation,
+                child: const Text('정보 다시입력'),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Image.asset(
+                  imagePath,
+                  width: 250,
+                  height: 250,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
