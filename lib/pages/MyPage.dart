@@ -333,11 +333,119 @@ class _MyPageState extends State<MyPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+<<<<<<< HEAD
             Text(
               '알림 설정',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+=======
+            Container(
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400, width: 2.0),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '내정보',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: '이름'),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '성별',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      ToggleButtons(
+                        isSelected: [_isMaleSelected, _isFemaleSelected],
+                        onPressed: (int index) {
+                          setState(() {
+                            if (index == 0) {
+                              _isMaleSelected = !_isMaleSelected;
+                              _isFemaleSelected = false;
+                            } else if (index == 1) {
+                              _isMaleSelected = false;
+                              _isFemaleSelected = !_isFemaleSelected;
+                            }
+                          });
+                        },
+                        children: [
+                          Text('남성'),
+                          Text('여성'),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '금연 시작일',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: _quitDate ?? DateTime.now(),
+                            firstDate: DateTime(1950),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            setState(() {
+                              _quitDate = pickedDate;
+                            });
+                          }
+                        },
+                        style: ButtonStyle(
+                          alignment: Alignment
+                              .centerLeft, // Align button content to the left
+                        ),
+                        child: Text(
+                          _quitDate != null
+                              ? '${_quitDate!.toString().split(' ')[0]}'
+                              : '금연 시작 날짜',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await _saveUserInformation();
+                        _updateUserInformation();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('정보가 저장되었습니다.')),
+                        );
+                        // 토글 버튼 상태에 따라 선택된 성별 설정
+                      },
+                      child: const Text('저장'),
+                    ),
+                  ),
+                ],
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
               ),
             ),
             const SizedBox(height: 16.0),

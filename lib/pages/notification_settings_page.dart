@@ -24,6 +24,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       FlutterLocalNotificationsPlugin();
   final TextEditingController _controller = TextEditingController();
   late SharedPreferences prefs; // 추가: SharedPreferences 인스턴스
+  List<String> notificationHistory = [];
 
   @override
   void initState() {
@@ -251,157 +252,246 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         title: const Text('알림'), //알림 페이지의 상단바에 표시될 타이틀
       ),
       body: Material(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      showCupertinoModalPopup(
-                        context: context,
-                        builder: (BuildContext context) => SizedBox(
-                          height: 250,
-                          child: CupertinoDatePicker(
-                            backgroundColor: Colors.white,
-                            initialDateTime: dateTime2,
-                            onDateTimeChanged: (DateTime newTime) {
-                              setState(() {
-                                dateTime2 = newTime;
-                                scheduleNotification(); // 새로운 시간으로 알림 예약
-                              });
-                            },
-                            use24hFormat: true,
-                            mode: CupertinoDatePickerMode.time,
-                          ),
-                        ),
-                      ).then((value) {
-                        scheduleNotification();
-                      });
-                    },
+        child: Container(
+          margin: const EdgeInsets.all(16), // 테두리와 위젯 사이에 간격을 줍니다.
+          padding: const EdgeInsets.all(16), // 테두리 안의 위젯들에 간격을 줍니다.
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey), // 테두리 색상을 지정합니다.
+            borderRadius: BorderRadius.circular(8), // 테두리의 둥근 정도를 조절합니다.
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
                     child: Text(
-                      '${dateTime2.hour}시 ${dateTime2.minute}분',
-                      textAlign: TextAlign.end,
+                      '알림',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 16),
-                SizedBox(
-                  height: 36,
-                  width: 100,
-                  child: Transform.scale(
-                    scale: 0.8,
-                    child: CupertinoSwitch(
-                      value: isNotificationEnabled2,
-                      onChanged: toggleNotification2,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      showCupertinoModalPopup(
-                        context: context,
-                        builder: (BuildContext context) => SizedBox(
-                          height: 250,
-                          child: CupertinoDatePicker(
-                            backgroundColor: Colors.white,
-                            initialDateTime: dateTime,
-                            onDateTimeChanged: (DateTime newTime) {
-                              setState(() => dateTime = newTime);
-                            },
-                            use24hFormat: true,
-                            mode: CupertinoDatePickerMode.time,
-                          ),
-                        ),
-                      ).then((value) {
-                        scheduleNotification();
-                      });
-                    },
-                    child: Text(
-                      '${dateTime.hour}시 ${dateTime.minute}분',
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                SizedBox(
-                  height: 36,
-                  width: 100,
-                  child: Transform.scale(
-                    scale: 0.8,
-                    child: CupertinoSwitch(
-                      value: isNotificationEnabled,
-                      onChanged: toggleNotification,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              margin: const EdgeInsets.all(8),
-              child: TextField(
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(), labelText: '알림 메세지 입력'),
-                controller: _controller,
+                ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 135,
-                  child: ElevatedButton(
-                      onPressed: showNotification_30M,
-                      child: const Text(
-                        "30분",
-                        style: TextStyle(color: Colors.black),
-                      )),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 20), // 여백 추가
+                  const SizedBox(child: Text('금연여부 체크 알림')),
+                  const SizedBox(width: 20), // 여백 추가
+                  Flexible(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => SizedBox(
+                            height: 250,
+                            child: CupertinoDatePicker(
+                              backgroundColor: Colors.white,
+                              initialDateTime: dateTime2,
+                              onDateTimeChanged: (DateTime newTime) {
+                                setState(() {
+                                  dateTime2 = newTime;
+                                  scheduleNotification(); // 새로운 시간으로 알림 예약
+                                });
+                              },
+                              use24hFormat: true,
+                              mode: CupertinoDatePickerMode.time,
+                            ),
+                          ),
+                        ).then((value) {
+                          scheduleNotification();
+                        });
+                      },
+                      child: Text(
+                        '${dateTime2.hour}시 ${dateTime2.minute}분',
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ),
+                  //SizedBox(width: 16),
+                  SizedBox(
+                    height: 36,
+                    width: 100,
+                    child: Transform.scale(
+                      scale: 0.8,
+                      child: CupertinoSwitch(
+                        value: isNotificationEnabled2,
+                        onChanged: toggleNotification2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8), // 첫 번째 간격
+              Divider(color: Colors.grey), // 연한 회색 줄
+              SizedBox(height: 8), // 두 번째 간격
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 20), // 여백 추가
+                  const SizedBox(child: Text('격려 알림 시작')),
+                  const SizedBox(width: 44), // 여백 추가
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (BuildContext context) => SizedBox(
+                            height: 250,
+                            child: CupertinoDatePicker(
+                              backgroundColor: Colors.white,
+                              initialDateTime: dateTime,
+                              onDateTimeChanged: (DateTime newTime) {
+                                setState(() => dateTime = newTime);
+                              },
+                              use24hFormat: true,
+                              mode: CupertinoDatePickerMode.time,
+                            ),
+                          ),
+                        ).then((value) {
+                          scheduleNotification();
+                        });
+                      },
+                      child: Text(
+                        '${dateTime.hour}시 ${dateTime.minute}분',
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ),
+                  //SizedBox(width: 16),
+                  SizedBox(
+                    height: 36,
+                    width: 100,
+                    child: Transform.scale(
+                      scale: 0.8,
+                      child: CupertinoSwitch(
+                        value: isNotificationEnabled,
+                        onChanged: toggleNotification,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                margin: const EdgeInsets.all(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 15), // contentPadding 내부 여백조정
+                  child: TextField(
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '알림 메세지를 입력하세요'),
+                    controller: _controller,
+                  ),
                 ),
-                SizedBox(width: 16),
-                SizedBox(
-                  width: 135,
-                  child: ElevatedButton(
-                      onPressed: showNotification_1H,
-                      child: const Text(
-                        "1시간",
-                        style: TextStyle(color: Colors.black),
-                      )),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 135,
-                  child: ElevatedButton(
-                      onPressed: showNotification_90M,
-                      child: const Text(
-                        "1시간 30분",
-                        style: TextStyle(color: Colors.black),
-                      )),
-                ),
-                SizedBox(width: 16),
-                SizedBox(
-                  width: 135,
-                  child: ElevatedButton(
-                      onPressed: showNotification_2H,
-                      child: const Text(
-                        "2시간",
-                        style: TextStyle(color: Colors.black),
-                      )),
-                ),
-              ],
-            )
-          ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 135,
+                    child: ElevatedButton(
+                        onPressed: showNotification_30M,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
+                        child: const Text(
+                          "30분",
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                        )),
+                  ),
+                  SizedBox(width: 16),
+                  SizedBox(
+                    width: 135,
+                    child: ElevatedButton(
+                        onPressed: showNotification_1H,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
+                        child: const Text(
+                          "1시간",
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                        )),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 135,
+                    child: ElevatedButton(
+                        onPressed: showNotification_90M,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
+                        child: const Text(
+                          "1시간 30분",
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                        )),
+                  ),
+                  SizedBox(width: 16),
+                  SizedBox(
+                    width: 135,
+                    child: ElevatedButton(
+                        onPressed: showNotification_2H,
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Set the border radius value here
+                            ),
+                          ),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Color.fromARGB(255, 217, 202,
+                                  245)), // Set the button color to purple
+                        ),
+                        child: const Text(
+                          "2시간",
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                        )),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
