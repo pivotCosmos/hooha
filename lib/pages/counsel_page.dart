@@ -100,6 +100,14 @@ class _CounselPageState extends State<CounselPage> {
     setState(() {
       _messages.add(message);
     });
+    // 메시지 담은 후에 스크롤 내리기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   // 챗봇 응답 띄우기
@@ -368,15 +376,6 @@ class _CounselPageState extends State<CounselPage> {
     // 선택지 버튼 텍스트 업데이트
     setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
-
-    // 선택지 버튼 갱신 후에 스크롤 내리기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    });
 
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
