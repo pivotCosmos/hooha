@@ -40,6 +40,9 @@ class CounselPage extends StatefulWidget {
 }
 
 class _CounselPageState extends State<CounselPage> {
+  /// 로딩중인지 판단하는 상태값
+  bool isLoading = false;
+
   /// 챗봇이 사용자에게 보내는 메시지
   final _messages = <String>[];
 
@@ -300,6 +303,11 @@ class _CounselPageState extends State<CounselPage> {
     if (msgTxtHead! == prompt) {
       // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
 
+      // AI 응답을 기다리는 로딩 시작
+      setState(() {
+        isLoading = true;
+      });
+
       // "prompt" 표시 부분을 잘라내고 프롬프트 담기
       msgTxt = msgTxt?.substring(6);
 
@@ -321,6 +329,11 @@ class _CounselPageState extends State<CounselPage> {
         _addMessage('Error: ${error.toString()}');
         analytics.AnalyticsService.logErrorOccurred(
             "aiResponseError=${error.toString()}");
+      }).whenComplete(() {
+        setState(() {
+          // AI 응답을 가져왔으면 로딩 종료
+          isLoading = false;
+        });
       });
     } else {
       // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
@@ -386,22 +399,33 @@ class _CounselPageState extends State<CounselPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Stack(
         children: [
-          Expanded(
-            child: MessageBubbleListView(
-                scrollController: _scrollController,
-                messages: _messages,
-                styleChatbot: styleChatbot,
-                styleMe: styleMe),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: MessageBubbleListView(
+                    scrollController: _scrollController,
+                    messages: _messages,
+                    styleChatbot: styleChatbot,
+                    styleMe: styleMe),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Builder(
+                  builder: createOptionButtons,
+                ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            child: Builder(
-              builder: createOptionButtons,
+          if (isLoading) // 로딩 중이라면 인디케이터를 표시
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
-          ),
         ],
       ),
     );
