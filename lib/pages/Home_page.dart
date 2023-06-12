@@ -16,13 +16,11 @@ class _MainPageState extends State<MainPage> {
 
   
   String _name = '';
-  String _gender = '';
+  int? _checkdays = 0;
   DateTime? _quitDate;
   int _quitDays = 0;
-  int _attendanceCount = 0;
-  int _consecutiveDays = 0;
+  final int _consecutiveDays = 0;
   int _money = 0;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -43,7 +41,7 @@ class _MainPageState extends State<MainPage> {
       if (userData != null) {
         setState(() {
           _name = userData['name'] ?? '';
-          _gender = userData['gender'] ?? '';
+          _checkdays = userData['attendanceCount'] as int?; // 수정된 부분
           final quitDateTimestamp = userData['quitDate'];
           final int quitDateTimestampInt =
               quitDateTimestamp != null ? quitDateTimestamp : 0;
@@ -127,11 +125,11 @@ class _MainPageState extends State<MainPage> {
               style: const TextStyle(fontSize: 18.0),
             ),
             Text(
-              '금연 $_quitDays일 째',
+              '금연 $_quitDays 일 째',
               style: const TextStyle(fontSize: 18.0),
             ),
             Text(
-              '$_consecutiveDays일 동안 출석 중입니다.',
+              '$_checkdays 일 동안 출석 중입니다.',
               style: const TextStyle(fontSize: 18.0),
             ),
             Text(

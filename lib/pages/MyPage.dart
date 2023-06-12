@@ -2,13 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
-import 'notification_settings_page.dart';
 enum Gender { male, female }
 class MyPage extends StatefulWidget {
   const MyPage({Key? key}) : super(key: key);
@@ -18,11 +15,16 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
-  TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   String? _selectedGender;
   DateTime? _quitDate;
   String? _selectedJob;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  var _attendanceCount;
+  var _consecutiveDays;
+  var _isAttendanceCompleted;
+  var _lastAttendanceDate;
+
 
 
   DateTime dateTime = DateTime.now(); // 사용자가 선택한 시간을 저장
@@ -30,9 +32,11 @@ class _MyPageState extends State<MyPage> {
   int notificationId = 0; // 푸시 알림 ID
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  List<String> _genders = ['남성', '여성'];
-  List<bool> _isSelected = [false, false];
-  final List<String> _jobs = ['직장인', '학생', '주부', '군인', '무직'];
+  final List<String> _genders = ['남성', '여성'];
+  final List<bool> _isSelected = [false, false];
+  
+ 
+  
 
   @override
   void initState() {
@@ -66,21 +70,45 @@ class _MyPageState extends State<MyPage> {
   }
 
   Future<void> _saveUserInformation() async {
-    final kakao.User user = await kakao.UserApi.instance.me();
-    final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.id.toString());
-    if (user.id != null) {
-      final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.id.toString());
-      await userDocRef.set({
-        'userId': user.id.toString(),
-        'displayName': user.kakaoAccount?.profile?.nickname,
-        'email': user.kakaoAccount?.email,
-        'name': _nameController.text,
-        'gender': _selectedGender == Gender.male ? 'male' : 'female',
-        'quitDate': _quitDate != null ? _quitDate!.millisecondsSinceEpoch : null,
-        'job': _selectedJob,
+  final kakao.User user = await kakao.UserApi.instance.me();
+  if (user.id != null) {
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user.id.toString());
+
+    await userDocRef.update({
+      'displayName': user.kakaoAccount?.profile?.nickname,
+      'email': user.kakaoAccount?.email,
+      'name': _nameController.text,
+      'gender': _selectedGender == Gender.male ? 'male' : 'female',
+      'quitDate': _quitDate != null ? _quitDate!.millisecondsSinceEpoch : null,
+      'job': _selectedJob,
+    });
+
+    if (_attendanceCount != null) {
+      await userDocRef.update({'attendanceCount': _attendanceCount});
+    }
+
+    if (_consecutiveDays != null) {
+      await userDocRef.update({'consecutiveDays': _consecutiveDays});
+    }
+
+    if (_isAttendanceCompleted != null) {
+      await userDocRef.update({'isAttendanceCompleted': _isAttendanceCompleted});
+    }
+
+    if (_lastAttendanceDate != null) {
+      await userDocRef.update({
+        'lastAttendanceDate': _lastAttendanceDate!.toIso8601String(),
       });
     }
+
+    setState(() {
+      _loadUserInformation();
+    });
   }
+}
+
+
 
   Future<void> _updateUserInformation() async {
   final kakao.User user = await kakao.UserApi.instance.me();

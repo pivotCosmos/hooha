@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/kakao_login.dart';
-import 'package:flutter_application_1/main_view_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'pages/navigation.dart';
-import 'pages/InputInfo_Page.dart';
 import 'pages/Login_Page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ignore: non_constant_identifier_names
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
