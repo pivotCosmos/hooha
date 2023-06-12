@@ -125,37 +125,56 @@ class _MyPageState extends State<MyPage> {
                     ],
                   ),
                   const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: _quitDate ?? DateTime.now(),
-                        firstDate: DateTime(1950),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          _quitDate = pickedDate;
-                        });
-                      }
-                    },
-                    child: Text(
-                      _quitDate != null
-                          ? '금연 시작일: ${_quitDate!.toString().split(' ')[0]}'
-                          : '금연 시작 날짜',
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '금연 시작일',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: _quitDate ?? DateTime.now(),
+                            firstDate: DateTime(1950),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            setState(() {
+                              _quitDate = pickedDate;
+                            });
+                          }
+                        },
+                        style: ButtonStyle(
+                          alignment: Alignment
+                              .centerLeft, // Align button content to the left
+                        ),
+                        child: Text(
+                          _quitDate != null
+                              ? '${_quitDate!.toString().split(' ')[0]}'
+                              : '금연 시작 날짜',
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _saveUserInformation();
-                      _updateUserInformation();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('정보가 저장되었습니다.')),
-                      );
-                      // 토글 버튼 상태에 따라 선택된 성별 설정
-                    },
-                    child: const Text('저장'),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await _saveUserInformation();
+                        _updateUserInformation();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('정보가 저장되었습니다.')),
+                        );
+                        // 토글 버튼 상태에 따라 선택된 성별 설정
+                      },
+                      child: const Text('저장'),
+                    ),
                   ),
                 ],
               ),
