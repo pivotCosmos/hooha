@@ -228,9 +228,9 @@ class _CounselPageState extends State<CounselPage> {
   /// OpenAI API에서 답변 가져오기
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
-    const message = 'I love you and thank you';
-    final response = await http.post(
-      Uri.parse('https://api.openai.com/v1/chat//completions'),
+    final response = await http
+        .post(
+      Uri.parse('https://api.openai.com/v1/chat/completions'),
       headers: {
         'Authorization': 'Bearer $OPENAI_API_KEY',
         'Content-Type': 'application/json',
@@ -243,13 +243,26 @@ class _CounselPageState extends State<CounselPage> {
         'max_tokens': 1000,
         'temperature': 0.5,
       }),
-    );
+    )
+        .timeout(Duration(seconds: 30), onTimeout: () {
+      throw TimeoutException('API 요청 시간이 초과되었습니다.');
+    });
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       return data['choices'][0]['text'].toString();
     } else {
       throw Exception('Failed to generate text');
+      // 요청 실패 처리
+    }
+  }
+
+  void main() async {
+    try {
+      final result = await _getAIResponse('Hello');
+      print('결과: $result');
+    } catch (e) {
+      print('오류 발생: $e');
     }
   }
 
@@ -311,7 +324,7 @@ class _CounselPageState extends State<CounselPage> {
 
       // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
       String completePrompt = "$job인 $name님" + msgTxt!;
-      print("completePrompt=$completePrompt");
+      //print("completePrompt=$completePrompt");
 
       _getAIResponse(completePrompt).then((aiResponse) {
         _addMessage(aiResponse);
