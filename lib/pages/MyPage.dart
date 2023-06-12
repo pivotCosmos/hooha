@@ -212,83 +212,94 @@ class _MyPageState extends State<MyPage> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '내정보',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '내정보',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: '이름'),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '성별',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal,
+                      const SizedBox(height: 16.0),
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(labelText: '이름'),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '성별',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                            ),
                           ),
-                        ),
-                        ToggleButtons(
-                          isSelected: _isSelected,
-                          onPressed: _selectGender,
-                          children: [
-                            Text('남성'),
-                            Text('여성'),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: _quitDate ?? DateTime.now(),
-                          firstDate: DateTime(1950),
-                          lastDate: DateTime.now(),
-                        );
-                        if (pickedDate != null) {
-                          setState(() {
-                            _quitDate = pickedDate;
-                          });
-                        }
-                      },
-                      child: Text(
-                        _quitDate != null
-                            ? '금연 시작일: ${_quitDate!.toString().split(' ')[0]}'
-                            : '금연 시작 날짜',
+                          ToggleButtons(
+                            isSelected: _isSelected,
+                            onPressed: _selectGender,
+                            children: [
+                              Text('남성'),
+                              Text('여성'),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _saveUserInformation();
-                        _updateUserInformation();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('정보가 저장되었습니다.')),
-                        );
-                        // 토글 버튼 상태에 따라 선택된 성별 설정
-                        setState(() {
-                          _selectedGender = _isSelected[0]
-                              ? _genders[0]
-                              : _isSelected[1]
-                                  ? _genders[1]
-                                  : null;
-                        });
-                      },
-                      child: const Text('저장'),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 16.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '금연 시작일',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed: () async {
+                              final DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: _quitDate ?? DateTime.now(),
+                                firstDate: DateTime(1950),
+                                lastDate: DateTime.now(),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  _quitDate = pickedDate;
+                                });
+                              }
+                            },
+                            style: ButtonStyle(
+                              alignment: Alignment
+                                  .centerLeft, // Align button content to the left
+                            ),
+                            child: Text(
+                              _quitDate != null
+                                  ? '${_quitDate!.toString().split(' ')[0]}'
+                                  : '금연 시작 날짜',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16.0),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await _saveUserInformation();
+                            _updateUserInformation();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('정보가 저장되었습니다.')),
+                            );
+                            // 토글 버튼 상태에 따라 선택된 성별 설정
+                          },
+                          child: const Text('저장'),
+                        ),
+                      ),
+                    ]),
               ),
               const SizedBox(height: 16.0),
               ListTile(

@@ -95,17 +95,6 @@ class _MainPageState extends State<MainPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Center(
-          child: Text(
-            '메인화면',
-            style: TextStyle(
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
