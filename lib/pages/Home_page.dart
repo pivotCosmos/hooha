@@ -59,34 +59,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  /*Future<void> _loadAttendanceCount() async {
-    final kakao.User user = await kakao.UserApi.instance.me();
-    final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.id.toString());
-    final user1 = _firestore.collection('users').doc(user.id.toString());
-    final userSnapshot = await userDocRef.get();
-    if (userSnapshot.exists) {
-      setState(() {
-        _attendanceCount = userSnapshot.get('attendanceCount') ?? 0;
-        _consecutiveDays = userSnapshot.get('consecutiveDays') ?? 0;
-      });
-    }
-  }*/
-
-  // 정보 다시입력 창
-  Future<void> _resetUserInformation() async {
-  final kakao.User user = await kakao.UserApi.instance.me();
-  final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.id.toString());
-
-  final dataToUpdate = {
-    'displayName': FieldValue.delete(),
-    'gender': FieldValue.delete(),
-    'quitDate': FieldValue.delete(),
-    'job': FieldValue.delete(),
-  };
-
-  await userDocRef.update(dataToUpdate);
-  await _loadUserInformation();
-}
 
   @override
   Widget build(BuildContext context) {
@@ -100,17 +72,6 @@ class _MainPageState extends State<MainPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Center(
-          child: Text(
-            '메인화면',
-            style: TextStyle(
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -136,11 +97,8 @@ class _MainPageState extends State<MainPage> {
               '$_money원 절약 중이에요.',
               style: const TextStyle(fontSize: 18.0),
             ),
-            ElevatedButton(
-              onPressed: _resetUserInformation,
-              child: const Text('정보 다시입력'),
-            ),
-            const SizedBox(height: 20),
+            
+          
             Center(
               child: Image.asset(
                 imagePath,

@@ -98,9 +98,14 @@ class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('일지 작성'),
-      ),
+  appBar: AppBar(
+    backgroundColor: Colors.white, // 상단바 배경색을 흰색으로 설정
+    title: const Text(
+      '일지 작성',
+      style: TextStyle(color: Colors.black), // 텍스트 색상을 검정색으로 설정
+    ),
+    iconTheme: IconThemeData(color: Colors.black), // 뒤로가기 아이콘 색상을 검정색으로 설정
+  ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -112,10 +117,10 @@ class _JournalPageState extends State<JournalPage> {
                   '선택한 날짜: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
                   style: const TextStyle(fontSize: 18.0),
                 ),
-                ElevatedButton(
+                OutlinedButton(
                   onPressed: _selectDate,
                   child: const Text('날짜 선택'),
-                ),
+                  ),
                 const SizedBox(height: 16.0),
                 TextField(
                   controller: _titleController,
@@ -134,7 +139,7 @@ class _JournalPageState extends State<JournalPage> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
+                OutlinedButton(
                   onPressed: _saveJournal,
                   child: const Text('일지 작성'),
                 ),
