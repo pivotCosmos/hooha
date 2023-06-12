@@ -248,9 +248,25 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // 흰색으로 변경
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('알림'), //알림 페이지의 상단바에 표시될 타이틀
+        backgroundColor: Colors.transparent,
+        elevation: 0, // 그림자 없애기
+        iconTheme: IconThemeData(
+          color: Colors.purple, // 원하는 색상으로 변경
+        ),
+        title: const Text(
+          "HOOHA",
+          style: TextStyle(
+            color: Color.fromARGB(255, 129, 67, 165),
+            fontSize: 24,
+            fontFamily: "Inter",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        centerTitle: true,
+        leading: null,
       ),
       body: Material(
         child: Container(

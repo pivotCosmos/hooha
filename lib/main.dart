@@ -1,13 +1,48 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_application_1/pages/navigation.dart';
+import '/pages/Home_page.dart';
+import '/kakao_login.dart';
+import '/main_view_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// ignore: unused_import
+import 'package:bubble/bubble.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/navigation.dart';
+import 'pages/InputInfo_Page.dart';
+import 'pages/Login_Page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-const apiKey = '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';
-const apiUrl = 'https://api.openai.com/v1/completions';
+// ignore: non_constant_identifier_names
+String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
+// ignore: constant_identifier_names
+const String MODEL_ID = 'gpt-3.5-turbo';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  await dotenv.load(fileName: 'assets/images/.env');
+  //임의로 로그인 관련 기능 전부 주석처리함 로그인기능하려면 주석 풀고
+  //밑에 @override 아래 위젯부분 지우면 됨
+
+  WidgetsFlutterBinding.ensureInitialized();
+  kakao.KakaoSdk.init(nativeAppKey: dotenv.env['NATIVE_APP_KEY']);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform); // Firebase 초기화
+
+  // 로그아웃 처리
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedOut = prefs.getBool('isLoggedOut') ?? false;
+  if (isLoggedOut) {
+    await kakao.UserApi.instance.logout();
+    prefs.setBool('isLoggedOut', false);
+  }
+  ;
+  await Firebase.initializeApp();
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,148 +50,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: NavigationExample(),
+    return MaterialApp(
+      title: 'HOOHA',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: LoginPage(kaKaoLogin: KakaoLogin()),
     );
   }
-}
 
-class FirstPage extends StatefulWidget {
-  const FirstPage({Key? key}) : super(key: key);
+  Future<bool> checkUserInformationExists() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final name = sharedPreferences.getString('name');
+    final gender = sharedPreferences.getString('gender');
+    final quitDate = sharedPreferences.getInt('quitDate');
 
-  @override
-  State<FirstPage> createState() => _FirstPageState();
-}
-
-class _FirstPageState extends State<FirstPage> {
-  final TextEditingController _controller = TextEditingController();
-
-  // var scheduledTime =
-  //     tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
-
-  @override
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("What is this?"),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _controller,
-          ),
-          TextButton(
-              onPressed: () {
-                String prompt = _controller.text;
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ResultPage(prompt)));
-              },
-              child: const Text("Get Result")),
-        ],
-      ),
-    );
-  }
-}
-
-class ResultPage extends StatefulWidget {
-  final String prompt;
-  const ResultPage(this.prompt, {super.key});
-
-  @override
-  State<ResultPage> createState() => _ResultPageState();
-}
-
-class _ResultPageState extends State<ResultPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Result from GPT"),
-      ),
-      body: FutureBuilder<String>(
-        future: generateText(widget.prompt),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            return Text('${snapshot.data}');
-          }
-        },
-      ),
-    );
-  }
-}
-
-Future<String> generateText(String prompt) async {
-  final response = await http.post(
-    Uri.parse(apiUrl),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey'
-    },
-    body: jsonEncode({
-      "model": "text-davinci-003",
-      'prompt': prompt,
-      'max_tokens': 1000,
-      'temperature': 0,
-      'top_p': 1,
-      'frequency_penalty': 0,
-      'presence_penalty': 0
-    }),
-  );
-
-  Map<String, dynamic> newresponse =
-      jsonDecode(utf8.decode(response.bodyBytes));
-
-  return newresponse['choices'][0]['text'];
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    // 사용자 정보가 모두 존재하는지 확인
+    if (name != null && gender != null && quitDate != null) {
+      return true; // 사용자 정보가 존재하면 true 반환
+    } else {
+      return false; // 사용자 정보가 존재하지 않으면 false 반환
+    }
   }
 }
