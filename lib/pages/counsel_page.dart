@@ -95,19 +95,24 @@ class _CounselPageState extends State<CounselPage> {
     _options = List.from(_defaultOptions); // Set default button options
   }
 
+  // 채팅창 스크롤 내리기
+  void autoScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
     });
     // 메시지 담은 후에 스크롤 내리기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    });
+    autoScroll();
   }
 
   // 챗봇 응답 띄우기
@@ -286,6 +291,15 @@ class _CounselPageState extends State<CounselPage> {
     _addMessage(clickedButtonTxt);
     //print("clickedButtonTxt=$clickedButtonTxt");
 
+    // 만약 직전에 클릭한 선택지가 feedback이라면 firebase analytics 로깅
+    if (clickedButtonTxt.length >= 8) {
+      String buttonTextHead = clickedButtonTxt.substring(0, 8);
+      String buttonTextBody = clickedButtonTxt.substring(8);
+      if (buttonTextHead == 'feedback') {
+        analytics.AnalyticsService.logSatisfiedFeedbackEvent(buttonTextBody);
+      }
+    }
+
     // 사용자가 클릭한 선택지에 연결된 메시지 이름 가져오기
     String nextMsgName = _nextMessageNames[buttonIndex];
     //print("nextMsgName=$nextMsgName");
@@ -345,7 +359,10 @@ class _CounselPageState extends State<CounselPage> {
       });
     } else {
       // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
-      _addMessage(msgTxt!);
+      // 시간차를 두고 버블이 생성되도록 _message에 넣기 전에 타이머 걸기
+      Timer(const Duration(milliseconds: 300), () {
+        _addMessage(msgTxt!);
+      });
       //print("using nextMsgNo(=$nextMsgName), msgTxt=$msgTxt");
     }
 
@@ -366,7 +383,18 @@ class _CounselPageState extends State<CounselPage> {
 
       // 선택지 텍스트 담기
       String? txt = optMap['optionTxt'];
-      optTxtList.add(txt!);
+
+      // 선택지 텍스트 앞부분에 "feedback"이 있으면 잘라서 나머지만 담기
+      if (txt!.length >= 8) {
+        String optionHead = txt.substring(0, 8);
+        if (optionHead == "feedback") {
+          String optionBody = txt.substring(8);
+          txt = optionBody;
+        }
+      }
+
+      // 선택지 리스트에 선택지 담기
+      optTxtList.add(txt);
 
       // 선택지와 연결된 다음 메시지 이름 담기
       String? nextMsgNo = optMap['nextMsg'];
@@ -377,10 +405,13 @@ class _CounselPageState extends State<CounselPage> {
     setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
 
+    // 버튼 갱신 후 채팅창 스크롤 내리기
+    autoScroll();
+
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
     analytics.AnalyticsService.logChatbotMsgPreparingEvent(
-        msgTxtHead, msgTxt, options!, nextMsgNamesString);
+        msgTxtHead, msgTxt!, options!, nextMsgNamesString);
   }
 
   /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 이름들 세팅
