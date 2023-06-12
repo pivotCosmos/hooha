@@ -12,7 +12,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart' as kakao;
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
-const String MODEL_ID = 'gpt-3.5-turbo';
+const String MODEL_ID = 'text-davinci-003';
 
 ///Counsel Module
 class GetCounsel extends StatelessWidget {
@@ -228,29 +228,36 @@ class _CounselPageState extends State<CounselPage> {
   /// OpenAI API에서 답변 가져오기
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
-    final response = await http
-        .post(
-      Uri.parse('https://api.openai.com/v1/chat/completions'),
+    final response = await http.post(
+      Uri.parse('https://api.openai.com/v1/engines/$MODEL_ID/completions'),
       headers: {
         'Authorization': 'Bearer $OPENAI_API_KEY',
         'Content-Type': 'application/json',
+        "model": "text-davinci-003",
+        "model": "davinci"
       },
       body: jsonEncode({
-        "model": "gpt-3.5-turbo",
-        "messages": [
-          {"role": "user", "content": message}
-        ],
+        'prompt': message,
         'max_tokens': 1000,
         'temperature': 0.5,
       }),
-    )
-        .timeout(Duration(seconds: 30), onTimeout: () {
-      throw TimeoutException('API 요청 시간이 초과되었습니다.');
-    });
+    );
+
+    // AI 답변 맨앞 불필요한 공백 제거
+    String trimAIResponse(String text) {
+      if (text.startsWith('\n')) {
+        return text.trimLeft();
+      } else {
+        return text;
+      }
+    }
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-      return data['choices'][0]['text'].toString();
+      String responseText = data['choices'][0]['text'].toString();
+      String cleanedResponseText = trimAIResponse(responseText);
+      print("cleanedResponseText=$cleanedResponseText");
+      return cleanedResponseText;
     } else {
       throw Exception('Failed to generate text');
       // 요청 실패 처리
@@ -324,7 +331,7 @@ class _CounselPageState extends State<CounselPage> {
 
       // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
       String completePrompt = "$job인 $name님" + msgTxt!;
-      //print("completePrompt=$completePrompt");
+      print("completePrompt=$completePrompt");
 
       _getAIResponse(completePrompt).then((aiResponse) {
         _addMessage(aiResponse);
@@ -370,7 +377,7 @@ class _CounselPageState extends State<CounselPage> {
     print("End of _showHoohaMsgAndUserOptions");
 
     // 선택지 버튼 갱신 후에 스크롤 내리기
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 200),
@@ -381,7 +388,7 @@ class _CounselPageState extends State<CounselPage> {
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
     analytics.AnalyticsService.logChatbotMsgPreparingEvent(
-        msgTxtHead, msgTxt!, options!, nextMsgNamesString);
+        msgTxtHead, msgTxt, options!, nextMsgNamesString);
   }
 
   /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 이름들 세팅
