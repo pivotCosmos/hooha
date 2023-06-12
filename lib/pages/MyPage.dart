@@ -222,10 +222,6 @@ class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // 뒤로가기 버튼 비활성화
-        title: const Text('My Page'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -312,90 +308,98 @@ class _MyPageState extends State<MyPage> {
                         ],
                       ),
                       const SizedBox(height: 16.0),
-                      Text(
-                        '직업',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              String? selectedJob = _selectedJob;
-                              return AlertDialog(
-                                title: Text('직업 선택'),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    RadioListTile<String>(
-                                      title: const Text('직장인'),
-                                      value: '직장인',
-                                      groupValue: selectedJob,
-                                      onChanged: (String? value) {
-                                        selectedJob = value;
-                                      },
-                                    ),
-                                    RadioListTile<String>(
-                                      title: const Text('학생'),
-                                      value: '학생',
-                                      groupValue: selectedJob,
-                                      onChanged: (String? value) {
-                                        selectedJob = value;
-                                      },
-                                    ),
-                                    RadioListTile<String>(
-                                      title: const Text('주부'),
-                                      value: '주부',
-                                      groupValue: selectedJob,
-                                      onChanged: (String? value) {
-                                        selectedJob = value;
-                                      },
-                                    ),
-                                    RadioListTile<String>(
-                                      title: const Text('군인'),
-                                      value: '군인',
-                                      groupValue: selectedJob,
-                                      onChanged: (String? value) {
-                                        selectedJob = value;
-                                      },
-                                    ),
-                                    RadioListTile<String>(
-                                      title: const Text('무직'),
-                                      value: '무직',
-                                      groupValue: selectedJob,
-                                      onChanged: (String? value) {
-                                        selectedJob = value;
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text('취소'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _selectedJob = selectedJob!;
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text('확인'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Text(
-                            _selectedJob != null ? _selectedJob! : '직업 선택'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '직업',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          SizedBox(width: 200), // 간격을 조정하는 SizedBox 추가
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    String? selectedJob = _selectedJob;
+                                    return AlertDialog(
+                                      title: Text('직업 선택'),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          RadioListTile<String>(
+                                            title: const Text('직장인'),
+                                            value: '직장인',
+                                            groupValue: selectedJob,
+                                            onChanged: (String? value) {
+                                              selectedJob = value;
+                                            },
+                                          ),
+                                          RadioListTile<String>(
+                                            title: const Text('학생'),
+                                            value: '학생',
+                                            groupValue: selectedJob,
+                                            onChanged: (String? value) {
+                                              selectedJob = value;
+                                            },
+                                          ),
+                                          RadioListTile<String>(
+                                            title: const Text('주부'),
+                                            value: '주부',
+                                            groupValue: selectedJob,
+                                            onChanged: (String? value) {
+                                              selectedJob = value;
+                                            },
+                                          ),
+                                          RadioListTile<String>(
+                                            title: const Text('군인'),
+                                            value: '군인',
+                                            groupValue: selectedJob,
+                                            onChanged: (String? value) {
+                                              selectedJob = value;
+                                            },
+                                          ),
+                                          RadioListTile<String>(
+                                            title: const Text('무직'),
+                                            value: '무직',
+                                            groupValue: selectedJob,
+                                            onChanged: (String? value) {
+                                              selectedJob = value;
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('취소'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _selectedJob = selectedJob!;
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('확인'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Text(
+                                _selectedJob != null ? _selectedJob! : '직업 선택',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Align(
                         alignment: Alignment.centerRight,
@@ -415,7 +419,7 @@ class _MyPageState extends State<MyPage> {
               ),
               const SizedBox(height: 16.0),
               ListTile(
-                tileColor: Colors.grey.shade50, // 타일의 배경색을 설정할 수 있습니다.
+                tileColor: Colors.white, // 타일의 배경색을 설정할 수 있습니다.
                 shape: RoundedRectangleBorder(
                   borderRadius:
                       BorderRadius.circular(8.0), // 테두리의 모서리를 둥글게 만듭니다.

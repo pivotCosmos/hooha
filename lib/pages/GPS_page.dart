@@ -178,13 +178,16 @@ class _MapSampleState extends State<MapSample> {
 
   bool _isWithinRange(double latitude, double longitude) {
     const double range = 100;
-    double distance = Geolocator.distanceBetween(
-      latitude,
-      longitude,
-      _destination!.latitude,
-      _destination!.longitude,
-    );
-    return distance <= range;
+    if (_destination != null) {
+      double distance = Geolocator.distanceBetween(
+        latitude,
+        longitude,
+        _destination!.latitude,
+        _destination!.longitude,
+      );
+      return distance <= range;
+    }
+    return false; // 또는 적절한 처리
   }
 
   Future<void> saveDestination(LatLng position) async {

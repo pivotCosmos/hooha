@@ -16,70 +16,26 @@ class NavigationExample extends StatefulWidget {
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
   List<String> notifications = []; //알림 리스트
-  @override
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // 배경색을 하얀색으로 설정
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(Icons.notifications),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        NotificationPage(notifications: notifications),
-                  ),
-                );
-              },
-              color: Colors.black, // 알림 아이콘의 색상을 검은색으로 설정
-            ),
-            const Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "HOOHA",
-                      style: TextStyle(
-                        color: Color(0xff374151),
-                        fontSize: 24,
-                        fontFamily: "Inter",
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        elevation: 0, // 그림자 없애기
+
+        title: const Text(
+          "HOOHA",
+          style: TextStyle(
+            color: Color(0xff374151),
+            fontSize: 24,
+            fontFamily: "Inter",
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              //알림 아이콘 눌렀을 때 실행될 로직 추가(예정)
-              Navigator.push(
-                  // 새로운 페이지로 이동하는 메서드 (NotificationPage로 이동)
-                  context,
-                  MaterialPageRoute(
-                      //새로운 페이지를 생성
-                      //builder 함수를 통해 NotificationPage 인스턴스를 생성
-                      builder: (context) => NotificationPage(
-                          notifications:
-                              notifications))); //notifications 변수를 페이지로 전달
-            },
-          )
-        ], //actions
+        centerTitle: true,
+        leading: null,
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -111,13 +67,13 @@ class _NavigationExampleState extends State<NavigationExample> {
           ),
         ],
       ),
-      body: _buildPage(currentPageIndex), // 수정된 부분
+      body: _buildPage(currentPageIndex),
     );
   }
 
   Widget _buildPage(int index) {
     if (index == 0) {
-      return const MainPage(); // 사용자 정보가 표시될 페이지
+      return const MainPage();
     } else if (index == 1) {
       return const CalendarPage();
     } else if (index == 2) {

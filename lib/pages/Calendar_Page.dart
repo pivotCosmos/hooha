@@ -228,16 +228,6 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: const Text(
-          '출석체크',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
