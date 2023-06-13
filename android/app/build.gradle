@@ -8,8 +8,12 @@ if (localPropertiesFile.exists()) {
 
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
+<<<<<<< HEAD
     // throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
     throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+=======
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -23,12 +27,19 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+<<<<<<< HEAD
 apply plugin: 'com.google.gms.google-services'
+=======
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+<<<<<<< HEAD
     namespace "com.example.hooha"
+=======
+    namespace "com.example.flutter_application_1"
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -47,10 +58,17 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+<<<<<<< HEAD
         applicationId "com.example.hooha"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 19
+=======
+        applicationId "com.example.flutter_application_1"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion flutter.minSdkVersion
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -71,5 +89,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+<<<<<<< HEAD
     implementation platform('com.google.firebase:firebase-bom:32.1.0')
+=======
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
 }

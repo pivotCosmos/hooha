@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
@@ -11,6 +10,7 @@
             android:src="@mipmap/launch_image" />
     </item> -->
 </layer-list>
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 <?xml version="1.0" encoding="utf-8"?>
@@ -40,3 +40,5 @@
 </layer-list>
 >>>>>>> 4c39a0e5b83d92c351e69461158a3eaa8aa426bf
 >>>>>>> b0bbf1cf6241080b1bc24fcb555254cd03b86e0c
+=======
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044

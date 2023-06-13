@@ -8,4 +8,8 @@ localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 
 def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+<<<<<<< HEAD
 apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+=======
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044

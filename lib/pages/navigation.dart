@@ -70,13 +70,23 @@ class _NavigationExampleState extends State<NavigationExample> {
             icon: Icon(Icons.supervised_user_circle_sharp),
             label: 'MyPage',
           ),
+          //NavigationDestination(
+          //icon: Icon(Icons.supervised_user_circle_sharp),
+          //label: 'GPS',
+          //),
         ],
       ),
       body: <Widget>[
         const HomePage(),
         const CalendarPage(),
+<<<<<<< HEAD
         const GetCounsel(),
         const MyPage(),
+=======
+        const CounselPage(),
+        MyPage(),
+        //GPSPage(),
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
       ][currentPageIndex],
     );
   }

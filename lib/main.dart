@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+<<<<<<< HEAD
 import 'notification.dart';
 import './pages/navigation.dart';
+=======
+import 'package:flutter_application_1/pages/navigation.dart';
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
 
 const apiKey = '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';
 const apiUrl = 'https://api.openai.com/v1/completions';
@@ -32,6 +36,7 @@ class FirstPage extends StatefulWidget {
 class _FirstPageState extends State<FirstPage> {
   final TextEditingController _controller = TextEditingController();
 
+<<<<<<< HEAD
   @override
   void initState() {
     FlutterLocalNotification.init();
@@ -41,13 +46,24 @@ class _FirstPageState extends State<FirstPage> {
   }
 
   @override
+=======
+  // var scheduledTime =
+  //     tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
+
+  @override
+  @override
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("What is this?"),
       ),
       body: Column(
+<<<<<<< HEAD
         children: <Widget>[
+=======
+        children: [
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
           TextField(
             controller: _controller,
           ),
@@ -58,9 +74,12 @@ class _FirstPageState extends State<FirstPage> {
                     builder: (context) => ResultPage(prompt)));
               },
               child: const Text("Get Result")),
+<<<<<<< HEAD
           TextButton(
               onPressed: () => FlutterLocalNotification.showNotification(),
               child: const Text("알림 보내기"))
+=======
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
         ],
       ),
     );

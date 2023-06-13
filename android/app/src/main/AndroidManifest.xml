@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+<<<<<<< HEAD
         android:label="hooha"
+=======
+        android:label="flutter_application_1"
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -30,4 +34,8 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+<<<<<<< HEAD
 </manifest>
+=======
+</manifest>
+>>>>>>> 9f761d9604313c721a935e097a2b416e43f0f044
