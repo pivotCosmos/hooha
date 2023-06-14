@@ -16,7 +16,7 @@
         
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value=  "AIzaSyCaH6YroWXY2CI1aPgAY231NpXADAXxsVo"/>
+                android:value=  "Your_API_KEY"/>
 
         <!-- 카카오 로그인 커스텀 URL 스킴 설정 -->
         <activity
