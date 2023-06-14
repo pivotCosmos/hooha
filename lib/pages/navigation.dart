@@ -28,7 +28,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         title: const Text(
           "HOOHA",
           style: TextStyle(
-            color: Color(0xff374151),
+            color: Color.fromARGB(255, 243, 137, 51),
             fontSize: 24,
             fontFamily: "Inter",
             fontWeight: FontWeight.w500,

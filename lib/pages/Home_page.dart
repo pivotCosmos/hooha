@@ -85,6 +85,7 @@ class _MainPageState extends State<MainPage> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white, // 흰색으로 변경
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -94,8 +95,10 @@ class _MainPageState extends State<MainPage> {
               Container(
                 padding: EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400, width: 2.0),
+                  border: Border.all(color: Colors.grey.shade100, width: 2.0),
                   borderRadius: BorderRadius.circular(8.0),
+                  color: Colors
+                      .grey.shade100, // 텍스트를 감싸는 테두리밖과 전체를 감싼 테두리 사이를 채우는 색상
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +110,7 @@ class _MainPageState extends State<MainPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16.0),
+                    const SizedBox(height: 50.0),
                     Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(220),
@@ -119,25 +122,160 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
                     ),
-                    Text(
-                      '$_name 님! 오늘도 방문해 주셨군요!',
-                      style: const TextStyle(fontSize: 18.0),
+                    const SizedBox(height: 30.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade100, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white, // 흰색으로 변경
+                      ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.person),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '$_name 님!',
+                                style: const TextStyle(fontSize: 18.0),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '후하를 통해 금연에 성공하세요',
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      '금연 시작일: ${_quitDate != null ? _quitDate.toString().split(' ')[0] : 'Not set'}',
-                      style: const TextStyle(fontSize: 18.0),
+                    const SizedBox(height: 20.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade100, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white, // 흰색으로 변경
+                      ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_today),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '금연 시작일',
+                                style: const TextStyle(fontSize: 18.0),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '${_quitDate != null ? _quitDate.toString().split(' ')[0] : 'Not set'}',
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      '금연 $_quitDays 일 째',
-                      style: const TextStyle(fontSize: 18.0),
+                    const SizedBox(height: 20.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade100, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white, // 흰색으로 변경
+                      ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.schedule),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '금연 기간',
+                                style: const TextStyle(fontSize: 18.0),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '금연 $_quitDays 일 째',
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      '$_checkdays 일 동안 출석 중입니다.',
-                      style: const TextStyle(fontSize: 18.0),
+                    const SizedBox(height: 20.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade100, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white, // 흰색으로 변경
+                      ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.check_circle),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '연속 출석',
+                                style: const TextStyle(fontSize: 18.0),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '$_checkdays 일 동안 출석 중입니다.',
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      '$_money원 절약 중이에요.',
-                      style: const TextStyle(fontSize: 18.0),
+                    const SizedBox(height: 20.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade100, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white, // 흰색으로 변경
+                      ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.attach_money),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '절약한 금액',
+                                style: const TextStyle(fontSize: 18.0),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '$_money원 절약 중이에요.',
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

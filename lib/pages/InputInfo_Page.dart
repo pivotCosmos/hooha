@@ -79,6 +79,7 @@ class _InputInfoPageState extends State<InputInfoPage> {
         'job': _selectedJob,
       });
     }
+
     if (widget.onInfoEntered != null) {
       widget.onInfoEntered!(); // onInfoEntered 콜백 호출
     }
@@ -104,6 +105,7 @@ class _InputInfoPageState extends State<InputInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white, // 흰색 배경색
         title: const Center(
@@ -164,7 +166,7 @@ class _InputInfoPageState extends State<InputInfoPage> {
                 ],
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
+              OutlinedButton(
                 onPressed: () async {
                   final selectedJob = await showDialog<String>(
                     context: context,
@@ -244,7 +246,7 @@ class _InputInfoPageState extends State<InputInfoPage> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              TextButton(
+              OutlinedButton(
                 onPressed: () async {
                   final DateTime? pickedDate = await showDatePicker(
                     context: context,
@@ -265,7 +267,7 @@ class _InputInfoPageState extends State<InputInfoPage> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
+              OutlinedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() == true &&
                       _selectedGender != null &&

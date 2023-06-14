@@ -26,7 +26,6 @@ class _MapSampleState extends State<MapSample> {
     super.initState();
     initializeNotifications();
     loadSavedDestination();
-    _getCurrentLocation(); // 현재 위치 가져오기
   }
 
   @override
@@ -77,11 +76,11 @@ class _MapSampleState extends State<MapSample> {
       appBar: AppBar(
         automaticallyImplyLeading: false, // 뒤로가기 버튼 비활성화
         title: Center(child: Text('피하고 싶은 흡연구역이 있나요?')),
-        backgroundColor: Color.fromARGB(255, 74, 236, 101),
+        backgroundColor: Color.fromARGB(255, 243, 137, 51),
         elevation: 0,
       ),
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        mapType: MapType.terrain,
         initialCameraPosition: CameraPosition(
           target: _destination ?? LatLng(37.317439546276, 127.12702648557),
           zoom: 14.0,
@@ -205,39 +204,5 @@ class _MapSampleState extends State<MapSample> {
         _destination = LatLng(latitude, longitude);
       });
     }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    serviceEnabled = await _location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
-    }
-
-    permissionGranted = await _location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await _location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    LocationData currentLocation = await _location.getLocation();
-    if (!_isAlarmTriggered &&
-        _isWithinRange(currentLocation.latitude!, currentLocation.longitude!)) {
-      _isAlarmTriggered = true;
-      showNotification();
-    }
-
-    setState(() {
-      _destination =
-          LatLng(currentLocation.latitude!, currentLocation.longitude!);
-    });
-    saveDestination(_destination!);
   }
 }

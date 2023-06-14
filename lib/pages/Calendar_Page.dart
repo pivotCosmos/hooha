@@ -22,8 +22,11 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime _currentDate = DateTime.now();
   late DocumentReference _userDocRef;
   bool _isDisposed = false;
-
-  final EventList<Event> _markedDateMap = EventList<Event>(events: {});
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -44,7 +47,7 @@ class _CalendarPageState extends State<CalendarPage> {
         FirebaseFirestore.instance.collection('users').doc(user.id.toString());
     final userDoc = await _userDocRef.get();
     final userData = userDoc.data() as Map<String, dynamic>?;
-    if (!_isDisposed) {
+    if (!_isDisposed && mounted) {
       if (userData != null) {
         setState(() {
           _attendanceCount = userData['attendanceCount'] ?? 0;
@@ -52,25 +55,6 @@ class _CalendarPageState extends State<CalendarPage> {
           _isAttendanceCompleted = userData['isAttendanceCompleted'] ?? false;
         });
       }
-    }
-  }
-
-  Future<void> _loadMarkedDates() async {
-    final attendanceSnapshot = await _userDocRef.collection('attendance').get();
-    for (final doc in attendanceSnapshot.docs) {
-      final attendanceDate = DateTime.parse(doc.id);
-      _markedDateMap.add(
-        attendanceDate,
-        Event(
-          date: attendanceDate,
-          dot: Container(
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      );
     }
   }
 
@@ -85,6 +69,7 @@ class _CalendarPageState extends State<CalendarPage> {
         final lastAttendanceDate = DateTime.parse(lastAttendanceDateStr);
         final difference = now.difference(lastAttendanceDate).inDays;
         if (difference < 1) {
+          // ignore: use_build_context_synchronously
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -141,21 +126,8 @@ class _CalendarPageState extends State<CalendarPage> {
         .doc(now.toIso8601String())
         .set({});
 
-    // 출석체크한 날짜를 _markedDateMap에 추가
-    _markedDateMap.add(
-      now,
-      Event(
-        date: now,
-        dot: Container(
-          decoration: const BoxDecoration(
-            color: Colors.green,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    );
-
     // 알림 표시
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -176,48 +148,6 @@ class _CalendarPageState extends State<CalendarPage> {
     setState(() {});
   }
 
-  Future<void> _resetAttendance() async {
-    final now = DateTime.now();
-
-    setState(() {
-      _attendanceCount = 0;
-      _consecutiveDays = 0;
-      _isAttendanceCompleted = false;
-      _markedDateMap.clear();
-    });
-
-    // 출석 관련 정보 초기화
-    await _userDocRef.set({
-      'attendanceCount': 0,
-      'consecutiveDays': 0,
-      'isAttendanceCompleted': false,
-      'lastAttendanceDate': null,
-    }, SetOptions(merge: true));
-
-    // 출석 기록 삭제
-    final attendanceSnapshot = await _userDocRef.collection('attendance').get();
-    for (final doc in attendanceSnapshot.docs) {
-      await doc.reference.delete();
-    }
-
-    // ignore: use_build_context_synchronously
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('알림'),
-        content: const Text('출석체크 기록이 초기화되었습니다.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _writeJournal() {
     Navigator.push(
       context,
@@ -228,38 +158,46 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
+      body: Center(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                '출석 일수: $_attendanceCount일',
-                style: const TextStyle(fontSize: 18.0),
-              ),
-              Text(
-                '연속 출석일: $_consecutiveDays일',
-                style: const TextStyle(fontSize: 18.0),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '출석 일수: $_attendanceCount일',
+                      style: const TextStyle(fontSize: 18.0),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      '연속 출석일: $_consecutiveDays일',
+                      style: const TextStyle(fontSize: 18.0),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  OutlinedButton(
                     onPressed: _checkAttendance,
                     child: const Text('출석체크'),
                   ),
                   const SizedBox(width: 16.0),
-                  ElevatedButton(
-                    onPressed: _resetAttendance,
-                    child: const Text('출석체크 기록 초기화'),
+                  OutlinedButton(
+                    onPressed: _writeJournal,
+                    child: const Text('일지 작성'),
                   ),
                 ],
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _writeJournal,
-                child: const Text('일지 작성'),
               ),
               const SizedBox(height: 16.0),
               Container(
@@ -272,40 +210,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     color: Color.fromARGB(255, 36, 128, 205),
                   ),
                   thisMonthDayBorderColor: Colors.grey,
-                  markedDatesMap: _markedDateMap,
-                  customDayBuilder: (
-                    bool isSelectable,
-                    int index,
-                    bool isSelectedDay,
-                    bool isToday,
-                    bool isPrevMonthDay,
-                    TextStyle textStyle,
-                    bool isNextMonthDay,
-                    bool isThisMonthDay,
-                    DateTime day,
-                  ) {
-                    final eventList = _markedDateMap.events[day];
-                    if (eventList != null && eventList.isNotEmpty) {
-                      return Container(
-                        margin: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.green,
-                        ),
-                        child: Center(
-                          child: Text(
-                            day.day.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      return null;
-                    }
-                  },
+                  // markedDatesMap: _markedDateMap, // 색칠된 날짜 부분을 주석 처리
                   weekFormat: false,
                   height: 360.0,
                   daysHaveCircularBorder: false,
