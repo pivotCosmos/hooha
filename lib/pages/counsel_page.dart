@@ -9,10 +9,22 @@ import 'package:bubble/bubble.dart';
 import 'package:intl/intl.dart';
 import 'package:hooha/services/firebase_analytics.dart' as analytics;
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart' as kakao;
+import 'package:loading_indicator/loading_indicator.dart';
 
 ///OpenAI API settings
 String OPENAI_API_KEY = dotenv.env['OPEN_AI_API_KEY']!;
 const String MODEL_ID = 'text-davinci-003';
+
+/// Loading Indicator colors
+const List<Color> indicatorColors = const [
+  Colors.red,
+  Colors.orange,
+  Colors.yellow,
+  Colors.green,
+  Colors.blue,
+  Colors.indigo,
+  Colors.purple,
+];
 
 ///Counsel Module
 class GetCounsel extends StatelessWidget {
@@ -42,6 +54,9 @@ class CounselPage extends StatefulWidget {
 }
 
 class _CounselPageState extends State<CounselPage> {
+  /// 로딩중인지 판단하는 상태값
+  bool isLoading = false;
+
   /// 챗봇이 사용자에게 보내는 메시지
   final _messages = <String>[];
 
@@ -62,7 +77,7 @@ class _CounselPageState extends State<CounselPage> {
   static const styleChatbot = BubbleStyle(
     nip: BubbleNip.leftCenter,
     color: Colors.white,
-    borderColor: Colors.blue,
+    borderColor: Color.fromARGB(255, 243, 137, 51),
     borderWidth: 1,
     elevation: 4,
     margin: BubbleEdges.only(
@@ -76,8 +91,8 @@ class _CounselPageState extends State<CounselPage> {
   /// 사용자 말풍선 스타일
   static const styleMe = BubbleStyle(
     nip: BubbleNip.rightCenter,
-    color: Color.fromARGB(255, 209, 230, 255),
-    borderColor: Colors.blue,
+    color: Color.fromARGB(255, 255, 234, 166),
+    borderColor: Color.fromARGB(255, 243, 137, 51),
     borderWidth: 1,
     elevation: 4,
     margin: BubbleEdges.only(
@@ -94,11 +109,24 @@ class _CounselPageState extends State<CounselPage> {
     _options = List.from(_defaultOptions); // Set default button options
   }
 
+  // 채팅창 스크롤 내리기
+  void autoScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   // _messages에 새로운 메시지 담기
   void _addMessage(String message) {
     setState(() {
       _messages.add(message);
     });
+    // 메시지 담은 후에 스크롤 내리기
+    autoScroll();
   }
 
   // 챗봇 응답 띄우기
@@ -138,8 +166,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'msgTxt': '오류가 발생했습니다.',
         'options': '',
@@ -177,8 +204,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'nextMsg': '오류가 발생했습니다.',
         'optionTxt': '',
@@ -216,8 +242,7 @@ class _CounselPageState extends State<CounselPage> {
       }
     } catch (e) {
       // 에러가 발생했을 경우 파이어베이스에 로그 남기기
-      analytics.AnalyticsService.logErrorOccurred(
-          'Firestore에서 데이터를 가져오는 중 오류가 발생했습니다: $e');
+      analytics.AnalyticsService.logErrorOccurred('Firestore: $e');
       return {
         'msgTxt': '오류가 발생했습니다.',
         'options': '',
@@ -229,17 +254,26 @@ class _CounselPageState extends State<CounselPage> {
   /// message: API에 보낼 프롬프트
   Future<String> _getAIResponse(String message) async {
     final response = await http.post(
-      Uri.parse('https://api.openai.com/v1/engines/$MODEL_ID/completions'),
+      Uri.parse('https://api.openai.com/v1/chat/completions'),
       headers: {
         'Authorization': 'Bearer $OPENAI_API_KEY',
         'Content-Type': 'application/json',
-        "model": "text-davinci-003",
-        "model": "davinci"
+        'Accept': 'application/json'
       },
       body: jsonEncode({
-        'prompt': message,
-        'max_tokens': 1000,
-        'temperature': 0.5,
+        'model': "gpt-3.5-turbo", // 사용할 AI 모델
+        'messages': [
+          {
+            'role': "user", // 메시지 역할을 user로 설정
+            'content': '$message' // 사용자가 입력한 메시지
+          },
+          {'role': "assistant", 'content': 'you are the best'}
+        ],
+        'temperature': 0.8, // 모델의 출력 다양성
+        'max_tokens': 1024, // 응답받을 메시지 최대 토큰(단어) 수 설정
+        'top_p': 1, // 토큰 샘플링 확률을 설정
+        'frequency_penalty': 0.5, // 일반적으로 나오지 않는 단어를 억제하는 정도
+        'presence_penalty': 0.5, // 동일한 단어나 구문이 반복되는 것을 억제하는 정도
       }),
     );
 
@@ -254,7 +288,7 @@ class _CounselPageState extends State<CounselPage> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-      String responseText = data['choices'][0]['text'].toString();
+      String responseText = data['choices'][0]['message']['content'].toString();
       String cleanedResponseText = trimAIResponse(responseText);
       print("cleanedResponseText=$cleanedResponseText");
       return cleanedResponseText;
@@ -295,6 +329,15 @@ class _CounselPageState extends State<CounselPage> {
     _addMessage(clickedButtonTxt);
     //print("clickedButtonTxt=$clickedButtonTxt");
 
+    // 만약 직전에 클릭한 선택지가 feedback이라면 firebase analytics 로깅
+    if (clickedButtonTxt.length >= 8) {
+      String buttonTextHead = clickedButtonTxt.substring(0, 8);
+      String buttonTextBody = clickedButtonTxt.substring(8);
+      if (buttonTextHead == 'feedback') {
+        analytics.AnalyticsService.logSatisfiedFeedbackEvent(buttonTextBody);
+      }
+    }
+
     // 사용자가 클릭한 선택지에 연결된 메시지 이름 가져오기
     String nextMsgName = _nextMessageNames[buttonIndex];
     //print("nextMsgName=$nextMsgName");
@@ -320,6 +363,11 @@ class _CounselPageState extends State<CounselPage> {
     if (msgTxtHead! == prompt) {
       // 1. 프롬프트인 경우 API 호출, AI 응답을 받아와서 _messages에 저장
 
+      // AI 응답을 기다리는 로딩 시작
+      setState(() {
+        isLoading = true;
+      });
+
       // "prompt" 표시 부분을 잘라내고 프롬프트 담기
       msgTxt = msgTxt?.substring(6);
 
@@ -330,7 +378,7 @@ class _CounselPageState extends State<CounselPage> {
       String? job = userData['job'];
 
       // 프롬프트 앞에 맞춤상담에 필요한 회원 정보 붙이기
-      String completePrompt = "$job인 $name님" + msgTxt!;
+      String completePrompt = "$job이라는 직업의 $name님" + msgTxt!;
       print("completePrompt=$completePrompt");
 
       _getAIResponse(completePrompt).then((aiResponse) {
@@ -341,10 +389,18 @@ class _CounselPageState extends State<CounselPage> {
         _addMessage('Error: ${error.toString()}');
         analytics.AnalyticsService.logErrorOccurred(
             "aiResponseError=${error.toString()}");
+      }).whenComplete(() {
+        setState(() {
+          // AI 응답을 가져왔으면 로딩 종료
+          isLoading = false;
+        });
       });
     } else {
       // 2. 시나리오인 경우 DB에서 가져와서 _messages에 저장
-      _addMessage(msgTxt!);
+      // 시간차를 두고 버블이 생성되도록 _message에 넣기 전에 타이머 걸기
+      Timer(const Duration(milliseconds: 300), () {
+        _addMessage(msgTxt!);
+      });
       //print("using nextMsgNo(=$nextMsgName), msgTxt=$msgTxt");
     }
 
@@ -365,7 +421,18 @@ class _CounselPageState extends State<CounselPage> {
 
       // 선택지 텍스트 담기
       String? txt = optMap['optionTxt'];
-      optTxtList.add(txt!);
+
+      // 선택지 텍스트 앞부분에 "feedback"이 있으면 잘라서 나머지만 담기
+      if (txt!.length >= 8) {
+        String optionHead = txt.substring(0, 8);
+        if (optionHead == "feedback") {
+          String optionBody = txt.substring(8);
+          txt = optionBody;
+        }
+      }
+
+      // 선택지 리스트에 선택지 담기
+      optTxtList.add(txt);
 
       // 선택지와 연결된 다음 메시지 이름 담기
       String? nextMsgNo = optMap['nextMsg'];
@@ -376,19 +443,13 @@ class _CounselPageState extends State<CounselPage> {
     setButtonOptions(optTxtList, nextMsgNameList);
     print("End of _showHoohaMsgAndUserOptions");
 
-    // 선택지 버튼 갱신 후에 스크롤 내리기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    });
+    // 버튼 갱신 후 채팅창 스크롤 내리기
+    autoScroll();
 
     String nextMsgNamesString = nextMsgNameList.join(', ');
     // 이 다음 챗봇 메시지를 띄워주기 위한 로깅
     analytics.AnalyticsService.logChatbotMsgPreparingEvent(
-        msgTxtHead, msgTxt, options!, nextMsgNamesString);
+        msgTxtHead, msgTxt!, options!, nextMsgNamesString);
   }
 
   /// 사용자에게 제공할 선택지와 선택지별 다음 메시지 이름들 세팅
@@ -406,21 +467,39 @@ class _CounselPageState extends State<CounselPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Stack(
         children: [
-          Expanded(
-            child: MessageBubbleListView(
-              scrollController: _scrollController,
-              messages: _messages,
-              styleChatbot: styleChatbot,
-              styleMe: styleMe,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: MessageBubbleListView(
+                    scrollController: _scrollController,
+                    messages: _messages,
+                    styleChatbot: styleChatbot,
+                    styleMe: styleMe),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Builder(
+                  builder: createOptionButtons,
+                ),
+              ),
+            ],
+          ),
+          if (isLoading) // 로딩 중이라면 인디케이터를 표시
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(50),
+                  child: LoadingIndicator(
+                    colors: indicatorColors,
+                    indicatorType: Indicator.pacman,
+                  ),
+                ),
+              ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            child: createOptionButtons(context),
-          ),
         ],
       ),
     );

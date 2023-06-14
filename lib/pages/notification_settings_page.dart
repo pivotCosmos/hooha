@@ -254,12 +254,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0, // 그림자 없애기
         iconTheme: IconThemeData(
-          color: Colors.purple, // 원하는 색상으로 변경
+          color: Color.fromARGB(255, 243, 137, 51), // 원하는 색상으로 변경
         ),
         title: const Text(
           "HOOHA",
           style: TextStyle(
-            color: Color.fromARGB(255, 129, 67, 165),
+            color: Color.fromARGB(255, 243, 137, 51),
             fontSize: 24,
             fontFamily: "Inter",
             fontWeight: FontWeight.w500,
@@ -423,13 +423,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "30분",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -446,13 +445,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "1시간",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                 ],
@@ -473,13 +471,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "1시간 30분",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -496,13 +493,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "2시간",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                 ],

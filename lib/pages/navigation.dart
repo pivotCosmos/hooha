@@ -28,10 +28,11 @@ class _NavigationExampleState extends State<NavigationExample> {
         title: const Text(
           "HOOHA",
           style: TextStyle(
-            color: Color.fromARGB(255, 129, 67, 165),
+            color: Color.fromARGB(255, 243, 137, 51),
             fontSize: 24,
             fontFamily: "Inter",
-            fontWeight: FontWeight.w500,
+            //fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,

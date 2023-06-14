@@ -12,6 +12,14 @@ class AnalyticsService {
     );
   }
 
+  /// 피드백 버튼 클릭 시 로깅
+  static Future<void> logSatisfiedFeedbackEvent(String feedbackDetail) async {
+    await analytics.logEvent(
+      name: "feedback",
+      parameters: {'feedback_detail': feedbackDetail},
+    );
+  }
+
   /// 직전 선택지 하나를 클릭해서 현재 챗봇 메시지로 오기까지에 대한 로깅
   /// 1. 직전 선택지에 딸려있었던 메시지들
   /// 2. 직전에 클릭한 메시지 인덱스

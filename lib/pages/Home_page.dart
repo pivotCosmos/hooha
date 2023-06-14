@@ -240,7 +240,7 @@ class _MainPageState extends State<MainPage> {
                           ),
                           SizedBox(height: 8.0),
                           Text(
-                            '$_checkdays 일 동안 출석 중입니다.',
+                            '$_consecutiveDays 일 동안 출석 중입니다.',
                             style: const TextStyle(fontSize: 18.0),
                           ),
                         ],

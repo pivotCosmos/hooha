@@ -73,6 +73,7 @@ dependencies:
   intl: ^0.18.0
   firebase_analytics: ^10.4.2
   flutter_native_timezone: ^2.0.0
+  loading_indicator: ^3.1.0
 
 dev_dependencies:
   flutter_test:
