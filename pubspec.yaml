@@ -108,6 +108,8 @@ flutter:
     - assets/images/5th.png
     - assets/images/LoginPagePicture.png
     - assets/images/.env
+    - assets/images/KakaoTalk_20230615_114454909_01.png
+    - assets/images/KakaoTalk_20230615_114454909.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

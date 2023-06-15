@@ -127,8 +127,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
-      '로컬 푸시 알림',
-      '출석체크 설정한 시간입니다!',
+      'HOOHA',
+      '오늘도 금연 성공하셨나요? 금연여부를 체크하세요!',
       nextDay,
       platformChannelSpecifics,
       //androidAllowWhileIdle: true,
@@ -158,7 +158,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
     flutterLocalNotificationsPlugin.zonedSchedule(
         1,
-        'HOOHA 푸쉬 알림(30분)',
+        'HOOHA',
         _controller.text,
         scheduledDate.add(const Duration(minutes: 30)),
         NotificationDetails(android: androidDetails),
@@ -300,7 +300,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   const SizedBox(width: 20), // 여백 추가
                   const SizedBox(child: Text('금연여부 체크 알림')),
                   const SizedBox(width: 20), // 여백 추가
-                  Flexible(
+                  ButtonTheme(
+                    alignedDropdown: true,
                     child: OutlinedButton(
                       onPressed: () {
                         showCupertinoModalPopup(
@@ -333,7 +334,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   //SizedBox(width: 16),
                   SizedBox(
                     height: 36,
-                    width: 100,
+                    width: 78,
                     child: Transform.scale(
                       scale: 0.8,
                       child: CupertinoSwitch(
@@ -353,7 +354,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   const SizedBox(width: 20), // 여백 추가
                   const SizedBox(child: Text('격려 알림 시작')),
                   const SizedBox(width: 44), // 여백 추가
-                  Expanded(
+                  ButtonTheme(
+                    alignedDropdown: true,
                     child: OutlinedButton(
                       onPressed: () {
                         showCupertinoModalPopup(
@@ -383,7 +385,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   //SizedBox(width: 16),
                   SizedBox(
                     height: 36,
-                    width: 100,
+                    width: 78,
                     child: Transform.scale(
                       scale: 0.8,
                       child: CupertinoSwitch(

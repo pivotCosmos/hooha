@@ -52,7 +52,7 @@ class _MainPageState extends State<MainPage> {
             _quitDays = now.difference(_quitDate!).inDays;
           }
           _money = _quitDays * 4500;
-          _consecutiveDays = userData['consecutiveDays'];
+          _consecutiveDays = userData['consecutiveDays'] ?? 0;
         });
       }
     }
