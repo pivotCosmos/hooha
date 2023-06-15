@@ -289,7 +289,7 @@ class _MyPageState extends State<MyPage> {
                                 fontWeight: FontWeight.normal,
                               ),
                             ),
-                            OutlinedButton(
+                            ElevatedButton(
                               onPressed: () async {
                                 final DateTime? pickedDate =
                                     await showDatePicker(
@@ -307,6 +307,13 @@ class _MyPageState extends State<MyPage> {
                               style: ButtonStyle(
                                 alignment: Alignment
                                     .centerLeft, // Align button content to the left
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Color.fromARGB(255, 243, 137, 51)),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.white),
+                                elevation: MaterialStateProperty.all<double>(0),
                               ),
                               child: Text(
                                 _quitDate != null
@@ -316,7 +323,7 @@ class _MyPageState extends State<MyPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16.0),
+                        const SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -327,9 +334,9 @@ class _MyPageState extends State<MyPage> {
                                 fontWeight: FontWeight.normal,
                               ),
                             ),
-                            SizedBox(width: 200), // 간격을 조정하는 SizedBox 추가
+                            SizedBox(width: 207), // 간격을 조정하는 SizedBox 추가
                             Expanded(
-                              child: OutlinedButton(
+                              child: ElevatedButton(
                                 onPressed: () {
                                   showDialog(
                                     context: context,
@@ -403,6 +410,18 @@ class _MyPageState extends State<MyPage> {
                                     },
                                   );
                                 },
+                                style: ButtonStyle(
+                                  alignment: Alignment
+                                      .center, // Align button content to the left
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Color.fromARGB(255, 243, 137, 51)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.white),
+                                  elevation:
+                                      MaterialStateProperty.all<double>(0),
+                                ),
                                 child: Text(
                                   _selectedJob != null
                                       ? _selectedJob!
@@ -412,9 +431,10 @@ class _MyPageState extends State<MyPage> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10.0),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: OutlinedButton(
+                          child: ElevatedButton(
                             onPressed: () async {
                               await _saveUserInformation();
                               _updateUserInformation();
@@ -423,6 +443,25 @@ class _MyPageState extends State<MyPage> {
                               );
                               // 토글 버튼 상태에 따라 선택된 성별 설정
                             },
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      20.0), // Set the border radius value here
+                                ),
+                              ),
+                              alignment: Alignment
+                                  .center, // Align button content to the left
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Color.fromARGB(255, 255, 174, 0)),
+                              elevation: MaterialStateProperty.all<double>(0),
+                              minimumSize: MaterialStateProperty.all<Size>(
+                                Size(double.infinity, 40), // 버튼의 너비와 높이를 설정합니다
+                              ),
+                            ),
                             child: const Text('저장'),
                           ),
                         ),

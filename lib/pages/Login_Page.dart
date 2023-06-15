@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import '/pages/InputInfo_Page.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import '/kakao_login.dart';
 import '/main_view_model.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   final KakaoLogin kaKaoLogin;
@@ -23,24 +20,52 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
       body: SingleChildScrollView(
-        child: Center(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          alignment: Alignment.center,
           child: StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               } else if (!snapshot.hasData || snapshot.data == null) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    await viewModel
-                        .login(); // kaKaoLogin 인스턴스의 login 메서드를 호출합니다.
-                    setState(() {});
-                  },
-                  child: const Text('Login'),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 9.67),
+                    Image.asset(
+                      'assets/images/login.png',
+                      width: 300,
+                      height: 200,
+                    ),
+                    const SizedBox(height: 30),
+                    GestureDetector(
+                      onTap: () async {
+                        await viewModel.login();
+                        setState(() {});
+                      },
+                      child: SizedBox(
+                        width: 220,
+                        height: 55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFFFEE500),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Image.asset(
+                                    'assets/images/kakao_login_large_narrow.png'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               } else {
                 User? user = snapshot.data;
@@ -50,33 +75,30 @@ class _LoginPageState extends State<LoginPage> {
                     Image.network(
                       viewModel.user?.kakaoAccount?.profile?.profileImageUrl ??
                           '',
+                      width: 250,
+                      height: 250,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        // 에러 발생 시 빈 컨테이너 반환하여 이미지가 표시되지 않도록 처리
                         return Container();
                       },
                     ),
-                    Text(
-                      '${viewModel.isLogined}',
-                      style: Theme.of(context).textTheme.headline4,
-                    ),
-                    ElevatedButton(
+                    OutlinedButton(
                       onPressed: () async {
-                        await viewModel
-                            .logout(); // kaKaoLogin 인스턴스의 logout 메서드를 호출합니다.
+                        await viewModel.logout();
                         setState(() {});
                       },
-                      child: const Text('Logout'),
+                      child: const Text('로그아웃'),
                     ),
-                    SizedBox(height: 16.0),
-                    ElevatedButton(
+                    const SizedBox(height: 16.0),
+                    OutlinedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => InputInfoPage()),
+                              builder: (context) => const InputInfoPage()),
                         );
                       },
-                      child: const Text('사용자 정보 입력'),
+                      child: const Text('HOOHA 시작하기'),
                     ),
                   ],
                 );

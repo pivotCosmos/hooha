@@ -52,7 +52,7 @@ class _MainPageState extends State<MainPage> {
             _quitDays = now.difference(_quitDate!).inDays;
           }
           _money = _quitDays * 4500;
-          _consecutiveDays = userData['consecutiveDays'];
+          _consecutiveDays = userData['consecutiveDays'] ?? 0;
         });
       }
     }
@@ -64,8 +64,11 @@ class _MainPageState extends State<MainPage> {
 
     // 연속 출석일에 따라 이미지 경로 변경
     switch (_consecutiveDays) {
-      case 1:
+      case 0:
         imagePath = 'assets/images/5th.png';
+        break;
+      case 1:
+        imagePath = 'assets/images/4th.png';
         break;
       case 2:
         imagePath = 'assets/images/4th.png';
@@ -77,11 +80,10 @@ class _MainPageState extends State<MainPage> {
         imagePath = 'assets/images/2nd.png';
         break;
       case 5:
-        imagePath = 'assets/images/1th.png';
+        imagePath = 'assets/images/1st.png';
         break;
       default:
-        imagePath = 'assets/images/3rd.png';
-        break;
+        imagePath = 'assets/images/1th.png';
     }
 
     return Scaffold(
@@ -240,7 +242,7 @@ class _MainPageState extends State<MainPage> {
                           ),
                           SizedBox(height: 8.0),
                           Text(
-                            '$_checkdays 일 동안 출석 중입니다.',
+                            '$_consecutiveDays 일 동안 출석 중입니다.',
                             style: const TextStyle(fontSize: 18.0),
                           ),
                         ],

@@ -248,9 +248,25 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // 흰색으로 변경
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('알림'), //알림 페이지의 상단바에 표시될 타이틀
+        backgroundColor: Colors.transparent,
+        elevation: 0, // 그림자 없애기
+        iconTheme: IconThemeData(
+          color: Color.fromARGB(255, 243, 137, 51), // 원하는 색상으로 변경
+        ),
+        title: const Text(
+          "HOOHA",
+          style: TextStyle(
+            color: Color.fromARGB(255, 243, 137, 51),
+            fontSize: 24,
+            fontFamily: "Inter",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        centerTitle: true,
+        leading: null,
       ),
       body: Material(
         child: Container(
@@ -407,13 +423,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "30분",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -430,13 +445,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "1시간",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                 ],
@@ -457,13 +471,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "1시간 30분",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                   SizedBox(width: 16),
@@ -480,13 +493,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                             ),
                           ),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              Color.fromARGB(255, 217, 202,
-                                  245)), // Set the button color to purple
+                              Color.fromARGB(255, 255, 174,
+                                  0)), // Set the button color to purple
                         ),
                         child: const Text(
                           "2시간",
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 56, 56, 56)),
+                          style: TextStyle(color: Colors.white),
                         )),
                   ),
                 ],

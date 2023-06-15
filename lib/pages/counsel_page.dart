@@ -92,7 +92,7 @@ class _CounselPageState extends State<CounselPage> {
   static const styleMe = BubbleStyle(
     nip: BubbleNip.rightCenter,
     color: Color.fromARGB(255, 255, 234, 166),
-    borderColor: Color.fromARGB(255, 255, 152, 0),
+    borderColor: Color.fromARGB(255, 243, 137, 51),
     borderWidth: 1,
     elevation: 4,
     margin: BubbleEdges.only(
