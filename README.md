@@ -1,8 +1,22 @@
 # 🌿 HOOHA
-TABA 2기 프로젝트
-## 🖥 1. 프로젝트 소개
-AI 기반 모바일 금연 매니저 서비스
-+ 주요 기능
-  + 금연 상담
-  + 맞춤 알림
-  + 금연 현황 확인
+![HOOHA 최종발표 표지](https://github.com/pivotCosmos/hooha/assets/99481661/660f444c-4206-4d6d-ad8f-88f868d99c82)
+## 🔍 1. 프로젝트 소개
+![HOOHA 최종발표 (1) 목차](https://github.com/pivotCosmos/hooha/assets/99481661/a267a221-6e45-419b-b508-f5f67d38f502)
+![HOOHA 최종발표 (2) 팀원소개](https://github.com/pivotCosmos/hooha/assets/99481661/8c68f03a-dad3-44a9-a3b8-99dcd27fec4d)
+![HOOHA 최종발표 (3) 서비스목표](https://github.com/pivotCosmos/hooha/assets/99481661/a2198fa6-ab0b-412f-8f09-7987722e415d)
+![HOOHA 최종발표 (4) 서비스목표2](https://github.com/pivotCosmos/hooha/assets/99481661/68248ed4-9361-4114-9e88-15a20aae3baf)
+![HOOHA 최종발표 (5) 개발환경](https://github.com/pivotCosmos/hooha/assets/99481661/5eb08ef3-c3f6-4881-9196-a8d4d17d9986)
+![HOOHA 최종발표 (6) 개발환경-API](https://github.com/pivotCosmos/hooha/assets/99481661/e4c4d349-877c-412d-891a-2c3d7b0fa3a2)
+![HOOHA 최종발표 (7) 시나리오](https://github.com/pivotCosmos/hooha/assets/99481661/07e49420-2d8b-4278-b775-fa9391eec906)
+![HOOHA 최종발표 (8) 시나리오-정보](https://github.com/pivotCosmos/hooha/assets/99481661/cfc1f795-d367-415a-a198-76bb14925313)
+![HOOHA 최종발표 (9) 시나리오-상담](https://github.com/pivotCosmos/hooha/assets/99481661/ad702be1-9a06-438c-b57c-a3d1e3e56f6b)
+![HOOHA 최종발표 (10) 디자인](https://github.com/pivotCosmos/hooha/assets/99481661/35c84afd-b7f8-4b29-bd5d-22ff39f0ce11)
+![HOOHA 최종발표 (11) 기능](https://github.com/pivotCosmos/hooha/assets/99481661/05b77492-4618-4b99-9b9a-be4cddb09a4c)
+![HOOHA 최종발표 (12) 로그인](https://github.com/pivotCosmos/hooha/assets/99481661/2fdcb9f1-a9c1-47d5-b323-165c3c327f2b)
+![HOOHA 최종발표 (13) 정보얻기](https://github.com/pivotCosmos/hooha/assets/99481661/bb023677-4dda-4c5d-b7b1-811c035f1855)
+![HOOHA 최종발표 (14) AI 상담](https://github.com/pivotCosmos/hooha/assets/99481661/676db2ba-5c0d-4738-b99c-71a0674153db)
+![HOOHA 최종발표 (15) 알림](https://github.com/pivotCosmos/hooha/assets/99481661/57e6ea29-3992-4210-856a-fff69f7b62d1)
+![HOOHA 최종발표 (16) 마이페이지](https://github.com/pivotCosmos/hooha/assets/99481661/16560a69-69b9-4b04-a623-ade4af87d278)
+![HOOHA 최종발표 (17) 출석](https://github.com/pivotCosmos/hooha/assets/99481661/09e9d9f2-64cd-42f6-8a64-667784a47fab)
+![HOOHA 최종발표 (18) 일지](https://github.com/pivotCosmos/hooha/assets/99481661/a813c35f-4318-49ab-85d8-72b0eef2a056)
+![HOOHA 최종발표 (19) GPS](https://github.com/pivotCosmos/hooha/assets/99481661/f7c25e42-7cd0-4b1c-9f24-bd28b124db66)
